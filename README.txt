@@ -1,55 +1,46 @@
-SUMEE PARTY RENTALS — STATIC WEBSITE
-=====================================
+SuMee Party Rentals — Website Package
 
-Files:
-- index.html
-- styles.css
-- script.js
+IMAGE FOLDERS
+assets/images/hero-event.jpg
+  Replace this file with the event photo you want across the large hero section.
 
-Business details currently used:
-- SuMee Party Rentals
-- Call/Text: (469) 666-7742
-- Service areas: Frisco, McKinney, Little Elm, Plano, Prosper, Celina
-- Rental categories: tables, chairs, tents, coolers, fans, plus additional event needs
+assets/images/perfect-for/
+  weddings.jpg
+  birthdays.jpg
+  graduations.jpg
+  corporate-events.jpg
+  family-gatherings.jpg
 
-HOW THE QUOTE FORM WORKS
-------------------------
-This website is 100% static and needs no database or paid form service.
-When a customer fills out the quote form and taps "Text My Request,"
-their device opens the SMS/message app with the request pre-filled to:
-(469) 666-7742
+These five are the suggested Perfect For images. Replace any file with your preferred photo while keeping the same filename.
 
-FREE HOSTING OPTION 1 — GITHUB PAGES
-------------------------------------
-1. Create a free GitHub account if you don't already have one.
-2. Create a new PUBLIC repository, for example: sumee-party-rentals.
-3. Upload index.html, styles.css and script.js to the repository root.
-4. Go to Settings > Pages.
-5. Under "Build and deployment," choose "Deploy from a branch."
-6. Select branch "main" and folder "/ (root)", then Save.
-7. GitHub will give you a free github.io website address.
-8. In the GitHub Pages settings, enter your GoDaddy domain in "Custom domain."
-9. GitHub will tell you which DNS records to add at GoDaddy.
-10. In GoDaddy > Domain > DNS, add/update the DNS records exactly as GitHub specifies.
-11. Turn on "Enforce HTTPS" in GitHub Pages once available.
+assets/images/rentals/
+  rental-01.jpg = Tables
+  rental-02.jpg = Chairs
+  rental-03.jpg = Tents
+  rental-04.jpg = Coolers & Fans
+  rental-05.jpg = Party Equipment
 
-FREE HOSTING OPTION 2 — CLOUDFLARE PAGES
-----------------------------------------
-Cloudflare Pages can also host these files for free. You can connect the same
-GoDaddy-purchased domain without transferring domain ownership. Follow the
-current Cloudflare Pages custom-domain/DNS prompts during setup.
+assets/images/gallery/
+  gallery-01.jpg through gallery-08.jpg
 
-ADDING YOUR REAL LOGO / PHOTOS
-------------------------------
-The current version deliberately uses a lightweight graphic treatment so the
-website works immediately without image files.
+LOGO
+assets/images/sumee-logo.png
+This version uses the supplied SuMee logo with its pale background removed and CSS object-fit: contain so the top/bottom are not cropped.
 
-To add your real logo/photos later:
-1. Put image files in an "images" folder.
-2. Replace the brand mark / hero illustration in index.html with <img> elements.
-3. Compress large phone photos before upload for faster loading.
+GITHUB
+Upload/replace all files and folders in your GitHub repository. Keep the folder structure exactly the same.
 
-IMPORTANT
----------
-You continue paying GoDaddy only for your normal domain registration/renewal.
-No separate paid web-hosting plan is required for this static site.
+DEFAULT PHOTOS
+--------------
+This package now includes default event photographs for:
+- Hero section
+- Weddings
+- Birthdays
+- Graduations
+- Corporate Events
+- Family Gatherings
+- All 8 gallery carousel positions
+
+You can replace any image later while keeping the exact same filename.
+The five Rental category images remain in assets/images/rentals/ and can be
+replaced with photos of your actual inventory.
