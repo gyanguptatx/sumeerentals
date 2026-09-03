@@ -1,0 +1,15 @@
+window.SUMEE_GALLERY = [
+  { src: "assets/images/gallery/gallery-01.jpg", alt: "Backyard table and chair setup" },
+  { src: "assets/images/gallery/gallery-02.jpg", alt: "Covered tent event setup" },
+  { src: "assets/images/gallery/gallery-03.jpg", alt: "Large tent setup with floor covering" },
+  { src: "assets/images/gallery/gallery-04.png", alt: "Round table and white chair setup" },
+  { src: "assets/images/gallery/gallery-05.jpg", alt: "Indoor floor seating setup" },
+  { src: "assets/images/gallery/gallery-06.jpg", alt: "Cocktail table setup" },
+  { src: "assets/images/gallery/gallery-07.jpg", alt: "Outdoor tent and banquet table" },
+  { src: "assets/images/gallery/gallery-08.jpg", alt: "Round table event setting" },
+  { src: "assets/images/gallery/gallery-09.png", alt: "Outdoor floor seating setup" },
+  { src: "assets/images/gallery/gallery-10.jpg", alt: "Cocktail table rental" },
+  { src: "assets/images/gallery/gallery-11.jpg", alt: "Tent and chair event setup" },
+  { src: "assets/images/gallery/gallery-12.jpg", alt: "Banquet table setup" },
+  { src: "assets/images/gallery/gallery-13.jpg", alt: "Backyard party setup" },
+];
