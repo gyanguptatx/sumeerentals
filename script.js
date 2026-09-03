@@ -1,29 +1,13 @@
-const phone = "+14696667742";
-
-document.getElementById("year").textContent = new Date().getFullYear();
-
-const dateInput = document.getElementById("date");
-const today = new Date();
-today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
-dateInput.min = today.toISOString().split("T")[0];
-
-document.getElementById("quoteForm").addEventListener("submit", function (event) {
-  event.preventDefault();
-
-  const name = document.getElementById("name").value.trim();
-  const date = document.getElementById("date").value;
-  const city = document.getElementById("city").value.trim();
-  const guests = document.getElementById("guests").value.trim();
-  const items = document.getElementById("items").value.trim();
-
-  const message =
-`Hi SuMee Party Rentals! I'd like a quote.
-
-Name: ${name}
-Event date: ${date}
-Event city: ${city}
-Estimated guests: ${guests || "Not sure"}
-Rentals needed: ${items}`;
-
-  window.location.href = `sms:${phone}?&body=${encodeURIComponent(message)}`;
-});
+const phone='+14696667742';
+document.getElementById('year').textContent=new Date().getFullYear();
+const menuBtn=document.querySelector('.menu-btn'),links=document.querySelector('.links');
+menuBtn.addEventListener('click',()=>links.classList.toggle('open'));
+document.querySelectorAll('.links a').forEach(a=>a.addEventListener('click',()=>links.classList.remove('open')));
+const car=document.getElementById('carousel');
+document.getElementById('next').onclick=()=>car.scrollBy({left:330,behavior:'smooth'});
+document.getElementById('prev').onclick=()=>car.scrollBy({left:-330,behavior:'smooth'});
+const lb=document.getElementById('lightbox'),lbImg=document.getElementById('lbImg');
+document.querySelectorAll('.carousel img').forEach(img=>img.addEventListener('click',()=>{lbImg.src=img.src;lb.classList.add('open')}));
+document.getElementById('closeLb').onclick=()=>lb.classList.remove('open');
+lb.addEventListener('click',e=>{if(e.target===lb)lb.classList.remove('open')});
+document.getElementById('quote').addEventListener('submit',e=>{e.preventDefault();const g=id=>document.getElementById(id).value.trim();const msg=`Hi SuMee Party Rentals! I'd like a quote.\n\nName: ${g('name')}\nPhone: ${g('phone')}\nEvent: ${g('eventType')||'Not specified'}\nDate: ${g('date')||'Not specified'}\nDetails: ${g('details')}`;window.location.href=`sms:${phone}?&body=${encodeURIComponent(msg)}`});
