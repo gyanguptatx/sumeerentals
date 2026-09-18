@@ -52,3 +52,32 @@ function applyMobileTableLabels(root=document){
 applyMobileTableLabels();
 const mobileTableObserver=new MutationObserver(()=>applyMobileTableLabels());
 mobileTableObserver.observe(document.body,{childList:true,subtree:true});
+
+// v5: fulfillment tracking for prototype. Firebase will persist these fields later.
+const fulfillmentState={};
+function fulfillmentHtml(id,o){
+ const f=fulfillmentState[id]||{};
+ return `<div class="fulfillment"><h3>Order Fulfillment</h3><div class="fulfillment-grid">
+ <div class="fulfill-card"><span>Delivery Requested</span><strong>${o.delivery}</strong>${f.delivered?`<div class="fulfill-status">✓ Delivered — ${f.delivered}</div><button class="secondary fulfill-action" data-fulfill="undo-delivery" data-id="${id}">Undo / Correct Delivery</button>`:`<button class="primary fulfill-action" data-fulfill="delivery" data-id="${id}">✓ Mark as Delivered</button><div class="fulfill-status">Not delivered yet</div>`}</div>
+ <div class="fulfill-card"><span>Pickup Requested</span><strong>${o.pickup}</strong>${f.picked?`<div class="fulfill-status">✓ Picked Up — ${f.picked}</div><button class="secondary fulfill-action" data-fulfill="undo-pickup" data-id="${id}">Undo / Correct Pickup</button>`:`<button class="primary fulfill-action" data-fulfill="pickup" data-id="${id}">✓ Mark as Picked Up</button><div class="fulfill-status">Not picked up yet</div>`}</div>
+ </div></div>`;
+}
+const originalOrderDetailHtml=orderDetailHtml;
+orderDetailHtml=function(id){
+ const html=originalOrderDetailHtml(id),o=demoOrders[id];
+ if(!o)return html;
+ const marker='<h3 class="packing-title">Packing List</h3>';
+ return html.replace(marker,fulfillmentHtml(id,o)+marker);
+};
+function stampNow(){return new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('.fulfill-action'); if(!b)return;
+ const id=b.dataset.id, action=b.dataset.fulfill; fulfillmentState[id] ||= {};
+ const msg=action==='delivery'?'Mark this order as delivered?':action==='pickup'?'Mark this order as picked up?':'Undo this fulfillment status?';
+ if(!confirm(msg))return;
+ if(action==='delivery')fulfillmentState[id].delivered=stampNow();
+ if(action==='pickup')fulfillmentState[id].picked=stampNow();
+ if(action==='undo-delivery')delete fulfillmentState[id].delivered;
+ if(action==='undo-pickup')delete fulfillmentState[id].picked;
+ mc.innerHTML=orderDetailHtml(id); applyMobileTableLabels(mc);
+});
