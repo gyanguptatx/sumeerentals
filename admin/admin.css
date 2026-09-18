@@ -8,3 +8,58 @@
 @media(max-width:650px){.order-detail-head{display:block}.order-detail-actions{margin-top:12px}.order-meta{grid-template-columns:1fr}}
 @media print{body *{visibility:hidden!important}#modal,#modal *{visibility:visible!important}#modal{position:absolute!important;inset:0!important;width:100%!important;max-width:none!important;height:auto!important;max-height:none!important;margin:0!important;border:0!important;box-shadow:none!important;padding:20px!important;overflow:visible!important;background:#fff!important}#modal::backdrop,.modal-close,.order-detail-actions{display:none!important}.order-link{text-decoration:none!important;color:#000!important}.admin-header,.admin-sidebar{display:none!important}.order-meta{grid-template-columns:1fr 1fr!important}table{width:100%!important;border-collapse:collapse!important}th,td{border-bottom:1px solid #bbb!important;padding:7px!important;text-align:left!important}}
 .order-link{display:inline-block;background:transparent!important;-webkit-appearance:none;appearance:none}
+
+/* v4 mobile-first responsive improvements */
+@media(max-width:700px){
+  .admin-header{height:62px;padding:0 10px;gap:8px}
+  .admin-brand img{width:128px;height:50px}
+  .admin-user{padding:6px 10px;font-size:12px}
+  .admin-shell{min-height:calc(100vh - 62px)}
+  .admin-sidebar{top:62px;gap:4px;padding:7px 8px;scrollbar-width:none;box-shadow:0 2px 8px #00000012}
+  .admin-sidebar::-webkit-scrollbar{display:none}
+  .admin-sidebar button,.admin-sidebar a{font-size:12px;padding:9px 11px;border-radius:18px}
+  .admin-sidebar button.active{border-left:0;background:var(--orange);color:#fff}
+  .admin-main{padding:12px 10px 28px;overflow:hidden}
+  .page-head{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px}
+  .page-head h1{font-size:24px}
+  .page-head p{font-size:13px;line-height:1.4}
+  .page-head .primary{width:100%;min-height:44px}
+  .stats{grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+  .stats article{padding:13px 12px;border-radius:11px}
+  .stats span{font-size:11px}.stats strong{font-size:22px;margin-top:4px}
+  .panel{padding:13px 11px;border-radius:11px;margin-bottom:14px}
+  .panel h2{font-size:18px;margin-bottom:11px}.panel h3{font-size:16px}
+  .toolbar input{max-width:none;width:100%}
+  .form-grid,.availability-form{grid-template-columns:1fr;gap:10px}
+  .availability-form button{grid-column:auto;width:100%;min-height:44px}
+  .form-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.form-actions button{min-height:44px}
+  .pricing{margin:15px 0 15px;width:100%;padding:11px}
+  .pricing label{grid-template-columns:1fr 115px;font-size:13px}.pricing .money{width:100%}
+  .order-number{float:none;display:inline-block;margin-left:5px}
+  input,select,textarea,button{font-size:16px!important} /* prevent iOS input zoom */
+  dialog{width:calc(100vw - 16px);max-width:none;max-height:92vh;padding:18px 12px;border-radius:14px;overflow:auto}
+  .modal-actions{display:grid;grid-template-columns:1fr 1fr}.modal-actions button{min-height:44px}
+  .order-detail-head{display:block}.order-detail-actions{display:grid;grid-template-columns:1fr;margin-top:10px}.order-detail-actions button{width:100%;min-height:44px}
+  .order-meta{grid-template-columns:1fr;gap:0}.order-summary{max-width:none;width:100%}
+  .release-note{font-size:13px}
+
+  /* Convert data tables into readable stacked cards on phones */
+  .table-wrap{overflow:visible}
+  table{min-width:0;width:100%}
+  table thead{display:none}
+  table,table tbody,table tr,table td{display:block;width:100%}
+  table tr{background:#fff;border:1px solid #efe1d3;border-radius:10px;margin:0 0 10px;padding:8px 10px;box-shadow:0 2px 7px #57240d0a}
+  table td{display:grid;grid-template-columns:42% 58%;align-items:start;gap:8px;padding:6px 0;border-bottom:1px solid #f3e9df;font-size:13px;overflow-wrap:anywhere}
+  table td:last-child{border-bottom:0}
+  table td::before{content:attr(data-label);font-size:10px;font-weight:800;color:#74675f;text-transform:uppercase;letter-spacing:.04em}
+  table td:empty::before{content:''}
+  table td .text-btn{padding:5px 0;text-align:left}
+  .order-link{font-size:15px;min-height:28px}
+  .pill{justify-self:start}
+}
+@media(max-width:390px){
+  .stats{grid-template-columns:1fr}
+  .admin-brand img{width:112px}
+  .admin-sidebar button,.admin-sidebar a{padding:8px 9px;font-size:11px!important}
+  .pricing label{grid-template-columns:1fr 100px}
+}

@@ -36,3 +36,19 @@ document.addEventListener('click',e=>{
 modal.addEventListener('close',()=>{const u=new URL(window.location.href);if(u.searchParams.has('order')){u.searchParams.delete('order');history.replaceState({},'',u)}});
 window.addEventListener('popstate',()=>{const id=new URL(window.location.href).searchParams.get('order');if(id)openOrder(id,false);else if(modal.open)modal.close()});
 const initialOrder=new URL(window.location.href).searchParams.get('order');if(initialOrder)openOrder(initialOrder,false);
+
+
+// Mobile table labels: make every table readable as stacked cards on narrow screens.
+function applyMobileTableLabels(root=document){
+  root.querySelectorAll('table').forEach(table => {
+    const headers=[...table.querySelectorAll('thead th')].map(th=>th.textContent.trim());
+    table.querySelectorAll('tbody tr').forEach(row => {
+      [...row.children].forEach((cell,i)=>{
+        if(cell.tagName==='TD') cell.setAttribute('data-label', headers[i] || '');
+      });
+    });
+  });
+}
+applyMobileTableLabels();
+const mobileTableObserver=new MutationObserver(()=>applyMobileTableLabels());
+mobileTableObserver.observe(document.body,{childList:true,subtree:true});
