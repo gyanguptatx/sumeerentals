@@ -84,3 +84,8 @@
 
 /* v10 customer/order/receivable */
 .customer-actions{display:flex;gap:8px;flex-wrap:wrap;min-width:390px}.customer-actions .text-btn{padding:6px 8px;border:1px solid #e8d7c7;border-radius:7px;background:#fffaf4}@media(max-width:700px){.customer-actions{display:grid;grid-template-columns:1fr;min-width:0;width:100%;gap:6px}.customer-actions .text-btn{width:100%;text-align:left;min-height:38px}#customers table td:last-child{display:block}#customers table td:last-child::before{display:block;margin-bottom:6px}}
+
+
+/* v11 demo interaction feedback */
+.demo-toast{position:fixed;right:18px;bottom:18px;background:var(--green);color:#fff;padding:12px 16px;border-radius:10px;font-weight:800;box-shadow:0 8px 25px #0003;opacity:0;transform:translateY(12px);pointer-events:none;transition:.2s;z-index:1000}.demo-toast.show{opacity:1;transform:none}
+@media(max-width:700px){.demo-toast{left:10px;right:10px;bottom:10px;text-align:center}.customer-actions{min-width:0}}
