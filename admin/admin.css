@@ -81,3 +81,6 @@
  .dashboard-sections .dispatch-card,.dashboard-sections .panel{margin:0}
 }
 @media(max-width:390px){.dashboard-kpis{grid-template-columns:1fr 1fr}}
+
+/* v10 customer/order/receivable */
+.customer-actions{display:flex;gap:8px;flex-wrap:wrap;min-width:390px}.customer-actions .text-btn{padding:6px 8px;border:1px solid #e8d7c7;border-radius:7px;background:#fffaf4}@media(max-width:700px){.customer-actions{display:grid;grid-template-columns:1fr;min-width:0;width:100%;gap:6px}.customer-actions .text-btn{width:100%;text-align:left;min-height:38px}#customers table td:last-child{display:block}#customers table td:last-child::before{display:block;margin-bottom:6px}}
