@@ -184,3 +184,54 @@ document.addEventListener('click',e=>{if(e.target.closest('.demo-save-order')){m
 
 // Modal X works even after dynamic content changes.
 document.querySelector('.modal-close')?.addEventListener('click',()=>modal.close());
+
+// v12: Full Edit Order screen mirrors New Order item/pricing controls.
+function orderEditHtml(id){
+ const o=demoOrders[id]; if(!o)return '<p>Order not found.</p>';
+ return `<h2>Edit Order ${id}</h2>
+ <div class="order-edit-grid">
+  <label>Customer<input id="editCustomer" value="${o.customer}"></label>
+  <label>Order Status<select id="editStatus"><option ${o.status==='Draft'?'selected':''}>Draft</option><option ${o.status==='Confirmed'?'selected':''}>Confirmed</option><option ${o.status==='Cancelled'?'selected':''}>Cancelled</option></select></label>
+  <label>Event Date / Time<input id="editEvent" value="${o.event}"></label>
+  <label>Delivery Requested<input id="editDelivery" value="${o.delivery}"></label>
+  <label>Pickup Requested<input id="editPickup" value="${o.pickup}"></label>
+  <label class="wide">Event Address<input id="editAddress" value="${o.eventAddress}"></label>
+ </div>
+ <h3>Rental Items</h3>
+ <div class="table-wrap"><table class="edit-order-items"><thead><tr><th>Item</th><th>Available</th><th>Qty</th><th>Unit Price</th><th>Amount</th><th></th></tr></thead><tbody id="editOrderItems">${o.items.map(x=>editOrderLineHtml(x)).join('')}</tbody></table></div>
+ <button class="secondary" id="editAddItem" data-id="${id}">+ Add Item</button>
+ <div class="edit-order-pricing">
+  <label>Suggested Price<strong id="editSuggested">$0.00</strong></label>
+  <label>Setup Fee<input id="editSetup" type="number" min="0" step=".01" value="${o.setup}"></label>
+  <label>Delivery Fee<input id="editDeliveryFee" type="number" min="0" step=".01" value="${o.deliveryFee}"></label>
+  <label>Discount<input id="editDiscount" type="number" min="0" step=".01" value="${o.discount}"></label>
+  <label class="total-row">Total Amount<strong id="editTotal">$0.00</strong></label>
+  <label>Amount Received<strong>${money(o.received)}</strong></label>
+  <label>Amount Pending<strong id="editPending">$0.00</strong></label>
+ </div>
+ <div class="order-edit-grid"><label class="wide">Notes<textarea id="editNotes" rows="3">${o.notes||''}</textarea></label></div>
+ <div class="edit-order-footer"><button class="danger-btn" data-delete-order="${id}">Delete / Cancel Order</button><div><button class="secondary" data-cancel-edit="${id}">Cancel</button> <button class="primary" data-save-full-order="${id}">Save Order Changes</button></div></div>`;
+}
+function editOrderLineHtml(x){
+ const selected=items.find(i=>i.name===x[0])||items[0];
+ return `<tr><td><select class="editItemSel">${items.map(i=>`<option value="${i.id}" ${i.name===x[0]?'selected':''}>${i.name}</option>`).join('')}</select></td><td class="editAvail">${selected.qty}</td><td><input class="editQty" type="number" min="1" value="${x[1]}"></td><td><input class="editPrice" type="number" min="0" step=".01" value="${x[2]}"></td><td class="editAmount">${money(x[1]*x[2])}</td><td><button class="text-btn editRemoveItem">Remove</button></td></tr>`;
+}
+function recalcEditOrder(){
+ let suggested=0; document.querySelectorAll('#editOrderItems tr').forEach(r=>{const q=+r.querySelector('.editQty').value||0,p=+r.querySelector('.editPrice').value||0;r.querySelector('.editAmount').textContent=money(q*p);suggested+=q*p});
+ const setup=+document.getElementById('editSetup')?.value||0,fee=+document.getElementById('editDeliveryFee')?.value||0,discount=+document.getElementById('editDiscount')?.value||0;
+ const total=suggested+setup+fee-discount; const id=document.querySelector('[data-save-full-order]')?.dataset.saveFullOrder; const received=id?Number(demoOrders[id]?.received||0):0;
+ if(document.getElementById('editSuggested'))editSuggested.textContent=money(suggested);if(document.getElementById('editTotal'))editTotal.textContent=money(total);if(document.getElementById('editPending'))editPending.textContent=money(Math.max(0,total-received));
+ applyMobileTableLabels(mc);
+}
+function openFullOrderEditor(id){mc.innerHTML=orderEditHtml(id);recalcEditOrder();}
+// Capture Edit Order before the older prototype edit handler can replace the modal.
+document.addEventListener('click',e=>{const b=e.target.closest('.edit-order-btn');if(!b)return;e.preventDefault();e.stopImmediatePropagation();openFullOrderEditor(b.dataset.editOrder);},true);
+document.addEventListener('change',e=>{if(e.target.matches('.editItemSel')){const r=e.target.closest('tr'),it=items.find(i=>i.id===e.target.value);r.querySelector('.editAvail').textContent=it.qty;r.querySelector('.editPrice').value=it.price;recalcEditOrder();}});
+document.addEventListener('input',e=>{if(e.target.matches('.editQty,.editPrice,#editSetup,#editDeliveryFee,#editDiscount'))recalcEditOrder();});
+document.addEventListener('click',e=>{
+ if(e.target.closest('.editRemoveItem')){e.preventDefault();e.target.closest('tr').remove();recalcEditOrder();return}
+ const add=e.target.closest('#editAddItem');if(add){const body=document.getElementById('editOrderItems');body.insertAdjacentHTML('beforeend',editOrderLineHtml([items[0].name,1,items[0].price]));recalcEditOrder();return}
+ const cancel=e.target.closest('[data-cancel-edit]');if(cancel){openOrder(cancel.dataset.cancelEdit,false);return}
+ const del=e.target.closest('[data-delete-order]');if(del){if(confirm('Cancel this order? The prototype keeps it in history but changes its status to Cancelled.')){demoOrders[del.dataset.deleteOrder].status='Cancelled';openOrder(del.dataset.deleteOrder,false);toast('Order cancelled in this demo.')}return}
+ const save=e.target.closest('[data-save-full-order]');if(save){const id=save.dataset.saveFullOrder,o=demoOrders[id];o.customer=document.getElementById('editCustomer').value;o.status=document.getElementById('editStatus').value;o.event=document.getElementById('editEvent').value;o.delivery=document.getElementById('editDelivery').value;o.pickup=document.getElementById('editPickup').value;o.eventAddress=document.getElementById('editAddress').value;o.setup=+document.getElementById('editSetup').value||0;o.deliveryFee=+document.getElementById('editDeliveryFee').value||0;o.discount=+document.getElementById('editDiscount').value||0;o.notes=document.getElementById('editNotes').value;o.items=[...document.querySelectorAll('#editOrderItems tr')].map(r=>{const it=items.find(i=>i.id===r.querySelector('.editItemSel').value);return [it.name,+r.querySelector('.editQty').value||0,+r.querySelector('.editPrice').value||0]});openOrder(id,false);toast('Order items and pricing updated in this demo.');}
+});
