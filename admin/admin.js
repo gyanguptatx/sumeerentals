@@ -81,3 +81,35 @@ document.addEventListener('click',e=>{
  if(action==='undo-pickup')delete fulfillmentState[id].picked;
  mc.innerHTML=orderDetailHtml(id); applyMobileTableLabels(mc);
 });
+
+// Dashboard v9: 7-day dispatch windows, non-duplicated future events, and 2 KPI tiles.
+(function renderDashboardV9(){
+  const todayStart=new Date(); todayStart.setHours(0,0,0,0);
+  const windowEnd=new Date(todayStart); windowEnd.setDate(windowEnd.getDate()+7); windowEnd.setHours(23,59,59,999);
+  const parseDemoDate=(value)=>{ const d=new Date(value.replace(' · ', ' ')); return isNaN(d)?null:d; };
+  const orderRows=Object.entries(demoOrders).map(([id,o])=>{
+    const itemSubtotal=o.items.reduce((s,x)=>s+x[1]*x[2],0);
+    const total=itemSubtotal+o.setup+o.deliveryFee-o.discount;
+    const balance=Math.max(0,total-o.received);
+    return {id,o,event:parseDemoDate(o.event),delivery:parseDemoDate(o.delivery),pickup:parseDemoDate(o.pickup),total,balance};
+  });
+  const in7=d=>d && d>=todayStart && d<=windowEnd;
+  const fstate=id=>fulfillmentState[id]||{};
+  const deliveries=orderRows.filter(r=>in7(r.delivery) && !fstate(r.id).delivered).sort((a,b)=>a.delivery-b.delivery);
+  const pickups=orderRows.filter(r=>in7(r.pickup) && !fstate(r.id).picked).sort((a,b)=>a.pickup-b.pickup);
+  const dispatchIds=new Set([...deliveries,...pickups].map(r=>r.id));
+  const future=orderRows.filter(r=>r.event && r.event>=todayStart && !dispatchIds.has(r.id)).sort((a,b)=>a.event-b.event);
+  const fmt=d=>d?d.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'—';
+  const deliveryBox=document.querySelector('#upcomingDeliveries');
+  const pickupBox=document.querySelector('#upcomingPickups');
+  if(deliveryBox) deliveryBox.innerHTML=deliveries.length?deliveries.map(r=>`<div class="dispatch-item"><a class="order-link" href="?order=${r.id}" data-order-id="${r.id}">${r.id}</a> · ${r.o.customer}<small>${fmt(r.delivery)} · ${r.o.eventAddress.split(',').slice(-2,-1)[0].trim()} · Pending</small></div>`).join(''):'<div class="empty-dashboard">No deliveries in the next 7 days.</div>';
+  if(pickupBox) pickupBox.innerHTML=pickups.length?pickups.map(r=>`<div class="dispatch-item"><a class="order-link" href="?order=${r.id}" data-order-id="${r.id}">${r.id}</a> · ${r.o.customer}<small>${fmt(r.pickup)} · ${r.o.eventAddress.split(',').slice(-2,-1)[0].trim()} · Pending</small></div>`).join(''):'<div class="empty-dashboard">No pickups in the next 7 days.</div>';
+  const body=document.querySelector('#futureEventsTable tbody');
+  if(body) body.innerHTML=future.length?future.map(r=>`<tr><td><a class="order-link" href="?order=${r.id}" data-order-id="${r.id}">${r.id}</a></td><td>${r.o.customer}</td><td>${fmt(r.event)}</td><td>${fmt(r.delivery)}</td><td>${fmt(r.pickup)}</td><td>${money(r.balance)}</td><td><span class="pill ${r.balance<=0?'settled':'confirmed'}">${r.balance<=0?'Settled':r.o.status}</span></td></tr>`).join(''):'<tr><td colspan="7">No additional future events.</td></tr>';
+  // Prototype KPI calculation: collected revenue is amount received on demo orders; outstanding is remaining balance on active/pending orders.
+  const ytd=orderRows.reduce((s,r)=>s+Number(r.o.received||0),0);
+  const outstanding=orderRows.reduce((s,r)=>s+r.balance,0);
+  const yr=document.querySelector('#ytdRevenue'), ob=document.querySelector('#outstandingBalance');
+  if(yr) yr.textContent=money(ytd); if(ob) ob.textContent=money(outstanding);
+  applyMobileTableLabels(document.querySelector('#dashboard'));
+})();
