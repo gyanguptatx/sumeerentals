@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>SuMee Admin</title>
   <link rel="stylesheet" href="../css/styles.css">
-  <link rel="stylesheet" href="admin.css?v=20">
+  <link rel="stylesheet" href="admin.css?v=21">
 </head>
 <body class="admin-body">
   <div id="loginScreen" class="login-screen">
@@ -34,6 +34,7 @@
         <button class="navtab" data-page="neworder">New Order</button>
         <button class="navtab" data-page="receivable">Receivable</button>
         <button class="navtab" data-page="items">Items</button>
+        <button class="navtab" data-page="accounting">Accounting</button>
         <button class="navtab" data-page="partners">Partners</button>
         <a href="../">← Public Website</a>
       </aside>
@@ -42,7 +43,6 @@
 
         <section class="page active" id="dashboard">
           <div class="page-head"><div><h1>Dashboard</h1><p>SuMee rental operations at a glance.</p></div><button class="primary" data-go="neworder">+ New Order</button></div>
-          <div class="stats dashboard-kpis"><article><span>YTD Collected Revenue</span><strong id="ytdRevenue">$0.00</strong></article><article><span>Outstanding Balance</span><strong id="outstandingBalance">$0.00</strong></article></div>
           <div class="dashboard-sections">
             <div class="dispatch-card"><h2>Upcoming Deliveries <small>Today + Next 7 Days</small></h2><div id="upcomingDeliveries"></div></div>
             <div class="dispatch-card"><h2>Upcoming Pickups <small>Today + Next 7 Days</small></h2><div id="upcomingPickups"></div></div>
@@ -86,7 +86,7 @@
         <section class="page" id="receivable">
           <div class="page-head"><div><h1>Receivable</h1><p>Track balances and payments that still require attention.</p></div><button class="primary" id="addPayment">+ Add Payment</button></div>
           <div class="toolbar"><input id="receivableSearch" placeholder="Search customer name, phone, email or city..."></div>
-          <div class="panel"><div class="table-wrap"><table id="receivableTable"><thead><tr><th>Event Date</th><th>Pickup Date / Time</th><th>Order</th><th>Customer</th><th>Phone</th><th>Order Total</th><th>Amount Paid</th><th>Amount Pending</th></tr></thead><tbody></tbody></table></div></div>
+          <div class="panel"><div class="table-wrap"><table id="receivableTable"><thead><tr><th>Event Date</th><th>Pickup Date / Time</th><th>Order</th><th>Customer</th><th>Phone</th><th>Order Total</th><th>Amount Paid</th><th>Amount Pending</th><th>Action</th></tr></thead><tbody></tbody></table></div></div>
         </section>
 
         <section class="page" id="items">
@@ -94,10 +94,20 @@
           <div class="panel"><div class="table-wrap"><table><thead><tr><th>Item</th><th>Description</th><th>Total Qty</th><th>Unit Price</th><th>Active</th><th></th></tr></thead><tbody id="itemsBody"></tbody></table></div></div>
         </section>
 
+        <section class="page" id="accounting">
+          <div class="page-head"><div><h1>Accounting</h1><p>Review collected income, expenses, net cash and current outstanding balances.</p></div><button class="primary" id="addExpense">+ Add Expense</button></div>
+          <div class="panel accounting-filter"><div class="availability-form"><label>From<input id="accountingFrom" type="date"></label><label>To<input id="accountingTo" type="date"></label><button class="primary" id="applyAccounting">Apply</button></div></div>
+          <div class="stats accounting-kpis"><article><span>Collected Revenue</span><strong id="acctRevenue">$0.00</strong></article><article><span>Expenses</span><strong id="acctExpenses">$0.00</strong></article><article><span>Net Cash</span><strong id="acctNet">$0.00</strong></article><article><span>Outstanding Balance</span><strong id="acctOutstanding">$0.00</strong></article></div>
+          <div class="accounting-grid">
+            <div class="panel"><h2>Income</h2><div class="table-wrap"><table id="incomeTable"><thead><tr><th>Date</th><th>Customer</th><th>Order</th><th>Items</th><th>Revenue</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="panel"><h2>Expenses</h2><div class="table-wrap"><table id="expenseTable"><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th></th></tr></thead><tbody></tbody></table></div></div>
+          </div>
+        </section>
+
         <section class="page" id="partners">
           <div class="page-head"><div><h1>Partners</h1><p>Manage party partners now; the public Partners page can be enabled later.</p></div><button class="primary" id="newPartner">+ Add Partner</button></div>
           <div class="toolbar"><input id="partnerSearch" placeholder="Search business, category, contact or service area..."></div>
-          <div class="panel"><div class="table-wrap"><table id="partnersTable"><thead><tr><th>Business</th><th>Category</th><th>Phone</th><th>Featured</th><th>Active</th><th>Order</th><th></th></tr></thead><tbody></tbody></table></div></div>
+          <div class="panel"><div class="table-wrap"><table id="partnersTable"><thead><tr><th>Logo</th><th>Business</th><th>Category</th><th>Phone</th><th>Featured</th><th>Active</th><th>Order</th><th></th></tr></thead><tbody></tbody></table></div></div>
         </section>
       </main>
     </div>
@@ -106,6 +116,6 @@
   <dialog id="modal"><button class="modal-close" aria-label="Close">×</button><div id="modalContent"></div></dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=1"></script>
-  <script src="admin.js?v=20"></script>
+  <script src="admin.js?v=21"></script>
 </body>
 </html>
