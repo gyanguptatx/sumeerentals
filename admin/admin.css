@@ -149,3 +149,13 @@ dialog.modal-wide .order-edit-grid .wide{grid-column:1/-1}
   dialog.modal-wide #editItems{min-width:0!important}
   dialog.modal-wide .table-wrap{overflow-x:visible!important}
 }
+/* v25 simplified order workflow */
+.order-item-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+.availability-status{font-weight:800;padding:7px 11px;border-radius:999px;background:#f2eee9;color:#6f625b}
+.availability-status.passed{background:#e8f6ed;color:#06613f}.availability-status.failed{background:#fdeaea;color:#a52d22}
+.availability-result{margin-top:12px;padding:13px 15px;border:1px solid #e8ddd2;border-radius:10px;background:#fffaf4}
+.availability-lines{display:grid;gap:5px;margin-top:8px}.availability-lines .ok{color:#06613f}.availability-lines .bad{color:#a52d22;font-weight:800}
+#orderItems,#editItems{table-layout:fixed;min-width:0!important}#orderItems th:nth-child(1),#editItems th:nth-child(1){width:38%}#orderItems th:nth-child(2),#editItems th:nth-child(2){width:13%}#orderItems th:nth-child(3),#editItems th:nth-child(3){width:18%}#orderItems th:nth-child(4),#editItems th:nth-child(4){width:17%}#orderItems th:nth-child(5),#editItems th:nth-child(5){width:14%}
+#orderItems select,#editItems select,#orderItems input,#editItems input{width:100%;min-width:0}
+dialog.modal-wide{width:min(1500px,99vw);max-width:1500px}
+@media(max-width:700px){.order-item-actions>*{width:100%}.availability-status{text-align:center}#orderItems,#editItems{display:block}#orderItems thead,#editItems thead{display:none}#orderItems tbody,#editItems tbody,#orderItems tr,#editItems tr,#orderItems td,#editItems td{display:block;width:100%!important}#orderItems tr,#editItems tr{padding:10px 0;border-bottom:1px solid #eadfd5}#orderItems td,#editItems td{border:0;padding:6px 0}#orderItems td::before,#editItems td::before{content:attr(data-label);display:block;font-size:11px;text-transform:uppercase;color:#74675f;font-weight:800;margin-bottom:4px}}

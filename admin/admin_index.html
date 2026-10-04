@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>SuMee Admin</title>
   <link rel="stylesheet" href="../css/styles.css">
-  <link rel="stylesheet" href="admin.css?v=24">
+  <link rel="stylesheet" href="admin.css?v=25">
 </head>
 <body class="admin-body">
   <div id="loginScreen" class="login-screen">
@@ -75,8 +75,9 @@
             </div>
             <div class="release-note">Inventory available again: <strong id="releaseTime">—</strong> <small>(pickup + 2 hours)</small></div>
             <h3>Rental Items</h3>
-            <div class="table-wrap"><table id="orderItems"><thead><tr><th>Item</th><th>Available After Order</th><th>Qty</th><th>Unit Price</th><th>Item Amount</th><th></th></tr></thead><tbody></tbody></table></div>
-            <button class="secondary" type="button" id="addItem">+ Add Item</button>
+            <div class="table-wrap"><table id="orderItems"><thead><tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Item Amount</th><th></th></tr></thead><tbody></tbody></table></div>
+            <div class="order-item-actions"><button class="secondary" type="button" id="addItem">+ Add Item</button><button class="secondary" type="button" id="checkOrderAvailability">Check Availability</button><span class="availability-status" id="orderAvailabilityStatus">Not checked</span></div>
+            <div id="orderAvailabilityResult" class="availability-result" hidden></div>
             <div class="pricing"><label>Suggested Price<strong id="suggested">$0.00</strong></label><label>Setup Fee<input class="money" id="setup" type="number" min="0" step=".01" value="0"></label><label>Delivery Fee<input class="money" id="deliveryFee" type="number" min="0" step=".01" value="0"></label><label>Discount<input class="money" id="discount" type="number" min="0" step=".01" value="0"></label><label class="total">Total Amount<strong id="total">$0.00</strong></label></div>
             <label>Notes<textarea id="orderNotes" placeholder="Internal order notes..."></textarea></label>
             <div class="form-actions"><button class="secondary" type="button" id="saveDraft">Save Draft</button><button class="primary" type="button" id="confirmOrder">Confirm Order</button></div>
@@ -117,6 +118,6 @@
   <dialog id="modal"><button class="modal-close" aria-label="Close">×</button><div id="modalContent"></div></dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=1"></script>
-  <script src="admin.js?v=24"></script>
+  <script src="admin.js?v=25"></script>
 </body>
 </html>
