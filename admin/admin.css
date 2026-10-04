@@ -112,3 +112,11 @@ dialog.modal-wide #editItems{min-width:820px}
 #orderItems .line-remove,#editItems .line-remove{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:6px 10px;border:1px solid #ead8c8;border-radius:7px;background:#fff;color:#9a321f}
 #orderItems .line-available,#editItems .line-available{font-weight:800;color:var(--green);text-align:center}
 @media(max-width:700px){dialog.modal-wide{width:calc(100vw - 10px);max-width:none;padding:16px 10px}.modal-wide #editItems{min-width:760px}}
+
+/* v23 order editor sizing */
+dialog.modal-wide{width:min(1380px,98vw);max-width:1380px;max-height:96vh;padding:28px;overflow:auto}
+dialog.modal-wide #editItems{min-width:900px}
+dialog.modal-wide .order-edit-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+dialog.modal-wide .order-edit-grid .wide{grid-column:1/-1}
+@media(max-width:900px){dialog.modal-wide .order-edit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){dialog.modal-wide{width:calc(100vw - 8px);padding:16px 10px}dialog.modal-wide .order-edit-grid{grid-template-columns:1fr}}
