@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>SuMee Admin</title>
   <link rel="stylesheet" href="../css/styles.css">
-  <link rel="stylesheet" href="admin.css?v=23">
+  <link rel="stylesheet" href="admin.css?v=24">
 </head>
 <body class="admin-body">
   <div id="loginScreen" class="login-screen">
@@ -58,7 +58,7 @@
         <section class="page" id="customers">
           <div class="page-head"><div><h1>Customers</h1><p>Customer details, lifetime value, orders and payments.</p></div><button class="primary" id="addCustomer">+ Add Customer</button></div>
           <div class="toolbar"><input id="customerSearch" placeholder="Search name, phone, email or city..."></div>
-          <div class="panel"><div class="table-wrap"><table id="customerTable"><thead><tr><th>Customer</th><th>Phone</th><th>Lifetime $ Value</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
+          <div class="panel"><div class="table-wrap"><table id="customerTable"><thead><tr><th>Customer</th><th>Phone</th><th>Lifetime $ Value</th><th>$ Due</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
         </section>
 
         <section class="page" id="neworder">
@@ -75,7 +75,7 @@
             </div>
             <div class="release-note">Inventory available again: <strong id="releaseTime">—</strong> <small>(pickup + 2 hours)</small></div>
             <h3>Rental Items</h3>
-            <div class="table-wrap"><table id="orderItems"><thead><tr><th>Item</th><th>Available</th><th>Qty</th><th>Unit Price</th><th>Item Amount</th><th></th></tr></thead><tbody></tbody></table></div>
+            <div class="table-wrap"><table id="orderItems"><thead><tr><th>Item</th><th>Available After Order</th><th>Qty</th><th>Unit Price</th><th>Item Amount</th><th></th></tr></thead><tbody></tbody></table></div>
             <button class="secondary" type="button" id="addItem">+ Add Item</button>
             <div class="pricing"><label>Suggested Price<strong id="suggested">$0.00</strong></label><label>Setup Fee<input class="money" id="setup" type="number" min="0" step=".01" value="0"></label><label>Delivery Fee<input class="money" id="deliveryFee" type="number" min="0" step=".01" value="0"></label><label>Discount<input class="money" id="discount" type="number" min="0" step=".01" value="0"></label><label class="total">Total Amount<strong id="total">$0.00</strong></label></div>
             <label>Notes<textarea id="orderNotes" placeholder="Internal order notes..."></textarea></label>
@@ -91,6 +91,7 @@
 
         <section class="page" id="items">
           <div class="page-head"><div><h1>Items</h1><p>Manage rental inventory and standard pricing.</p></div><button class="primary" id="newItem">+ Add Item</button></div>
+          <div class="item-filters" id="itemFilters"><button class="secondary active" data-item-filter="active">Active Items</button><button class="secondary" data-item-filter="all">All Items</button><button class="secondary" data-item-filter="inactive">Inactive Items</button></div>
           <div class="panel"><div class="table-wrap"><table><thead><tr><th>Item</th><th>Description</th><th>Total Qty</th><th>Unit Price</th><th>Active</th><th></th></tr></thead><tbody id="itemsBody"></tbody></table></div></div>
         </section>
 
@@ -116,6 +117,6 @@
   <dialog id="modal"><button class="modal-close" aria-label="Close">×</button><div id="modalContent"></div></dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=1"></script>
-  <script src="admin.js?v=23"></script>
+  <script src="admin.js?v=24"></script>
 </body>
 </html>

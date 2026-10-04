@@ -120,3 +120,32 @@ dialog.modal-wide .order-edit-grid{grid-template-columns:repeat(3,minmax(0,1fr))
 dialog.modal-wide .order-edit-grid .wide{grid-column:1/-1}
 @media(max-width:900px){dialog.modal-wide .order-edit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){dialog.modal-wide{width:calc(100vw - 8px);padding:16px 10px}dialog.modal-wide .order-edit-grid{grid-template-columns:1fr}}
+
+/* v24 consolidated usability fixes */
+.item-filters{display:flex;gap:8px;flex-wrap:wrap;margin:-6px 0 16px}.item-filters .secondary.active{background:var(--green);color:#fff}.locked-note{display:inline-flex;align-items:center;padding:7px 10px;border-radius:8px;background:#f2efec;color:#6d625c;font-weight:800;font-size:12px}
+/* Desktop tables fit the content area without horizontal scrolling. */
+@media(min-width:701px){
+  .table-wrap{overflow-x:visible;width:100%}
+  table{min-width:0!important;width:100%;table-layout:auto}
+  th,td{padding:10px 7px;overflow-wrap:anywhere}
+  .customer-actions{min-width:0!important;gap:4px}
+  .customer-actions .text-btn{padding:5px 6px;font-size:12px}
+  #orderItems,#editItems{table-layout:fixed!important;min-width:0!important}
+  #orderItems th:nth-child(1),#editItems th:nth-child(1){width:31%}
+  #orderItems th:nth-child(2),#editItems th:nth-child(2){width:15%}
+  #orderItems th:nth-child(3),#editItems th:nth-child(3){width:10%}
+  #orderItems th:nth-child(4),#editItems th:nth-child(4){width:14%}
+  #orderItems th:nth-child(5),#editItems th:nth-child(5){width:16%}
+  #orderItems th:nth-child(6),#editItems th:nth-child(6){width:14%}
+  #orderItems select,#editItems select,#orderItems input,#editItems input{min-width:0!important;width:100%}
+  dialog.modal-wide{width:min(1480px,99vw);max-width:1480px;padding:26px}
+  dialog.modal-wide #editItems{min-width:0!important}
+  dialog.modal-wide .table-wrap{overflow-x:visible!important}
+  .customer-orders-table{table-layout:auto!important}
+}
+/* Mobile uses stacked table cards, not horizontal scrolling. */
+@media(max-width:700px){
+  .item-filters{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.item-filters .secondary{padding:9px 5px;font-size:11px}
+  dialog.modal-wide #editItems{min-width:0!important}
+  dialog.modal-wide .table-wrap{overflow-x:visible!important}
+}
