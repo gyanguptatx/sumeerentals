@@ -103,3 +103,12 @@
 @media(max-width:1050px){.accounting-grid{grid-template-columns:1fr}.accounting-kpis{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){.accounting-kpis{grid-template-columns:1fr 1fr}.payment-summary{grid-template-columns:1fr}.payment-head{align-items:stretch;flex-direction:column}.payment-head .primary{width:100%}.inline-field{grid-template-columns:1fr}.partner-logo-thumb,.logo-placeholder{width:48px;height:48px}}
 @media(max-width:390px){.accounting-kpis{grid-template-columns:1fr}}
+
+/* v22 order editor fixes */
+dialog.modal-wide{width:min(1180px,96vw);max-width:1180px;max-height:94vh;overflow:auto}
+dialog.modal-wide #modalContent{min-width:0}
+dialog.modal-wide .table-wrap{width:100%;overflow-x:auto}
+dialog.modal-wide #editItems{min-width:820px}
+#orderItems .line-remove,#editItems .line-remove{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:6px 10px;border:1px solid #ead8c8;border-radius:7px;background:#fff;color:#9a321f}
+#orderItems .line-available,#editItems .line-available{font-weight:800;color:var(--green);text-align:center}
+@media(max-width:700px){dialog.modal-wide{width:calc(100vw - 10px);max-width:none;padding:16px 10px}.modal-wide #editItems{min-width:760px}}
