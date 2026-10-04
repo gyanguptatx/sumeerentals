@@ -1,237 +1,98 @@
-const items=[{id:'ITEM-001',name:'White Resin Chair',desc:'White folding resin chair',qty:150,price:3},{id:'ITEM-002',name:"6' Rectangle Table",desc:'Lifetime 6-ft table',qty:25,price:12},{id:'ITEM-003',name:"6' Round Table",desc:'Round banquet table',qty:10,price:18},{id:'ITEM-004',name:'Cocktail Table',desc:'High-top cocktail table',qty:12,price:15},{id:'ITEM-005',name:'20×30 Tent',desc:'Commercial frame tent',qty:2,price:450}];
-const pages=document.querySelectorAll('.page'),tabs=document.querySelectorAll('.navtab');function go(id){pages.forEach(p=>p.classList.toggle('active',p.id===id));tabs.forEach(t=>t.classList.toggle('active',t.dataset.page===id));window.scrollTo(0,0)}tabs.forEach(t=>t.onclick=()=>go(t.dataset.page));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
-function renderItems(){itemsBody.innerHTML=items.map(x=>`<tr><td><strong>${x.name}</strong></td><td>${x.desc}</td><td>${x.qty}</td><td>$${x.price.toFixed(2)}</td><td>Yes</td><td><button class="text-btn item-edit" data-item-id="${x.id}">Edit</button></td></tr>`).join('')}renderItems();
-const tbody=document.querySelector('#orderItems tbody');function addLine(item=items[0]){const tr=document.createElement('tr');tr.innerHTML=`<td><select class="itemSel">${items.map(x=>`<option value="${x.id}">${x.name}</option>`).join('')}</select></td><td class="avail">${item.qty}</td><td><input class="qty" type="number" min="1" value="1"></td><td><input class="price" type="number" min="0" step=".01" value="${item.price}"></td><td class="amount">$${item.price.toFixed(2)}</td><td><button class="text-btn remove">Remove</button></td>`;tbody.appendChild(tr);const sel=tr.querySelector('.itemSel'),qty=tr.querySelector('.qty'),price=tr.querySelector('.price');sel.value=item.id;function recalc(){const it=items.find(x=>x.id===sel.value);tr.querySelector('.avail').textContent=it.qty;tr.querySelector('.amount').textContent='$'+((+qty.value||0)*(+price.value||0)).toFixed(2);totals()}sel.onchange=()=>{const it=items.find(x=>x.id===sel.value);price.value=it.price;recalc()};qty.oninput=recalc;price.oninput=recalc;tr.querySelector('.remove').onclick=()=>{tr.remove();totals()};recalc()}
-function totals(){let s=0;document.querySelectorAll('#orderItems .amount').forEach(a=>s+=+a.textContent.replace('$',''));suggested.textContent='$'+s.toFixed(2);let t=s+(+setup.value||0)+(+delivery.value||0)-(+discount.value||0);total.textContent='$'+t.toFixed(2);pending.textContent='$'+Math.max(0,t).toFixed(2)}[setup,delivery,discount].forEach(x=>x.oninput=totals);addItem.onclick=()=>addLine(items[Math.min(tbody.children.length,items.length-1)]);addLine(items[0]);addLine(items[1]);addLine(items[4]);
-pickup.onchange=()=>{const d=new Date(pickup.value);d.setHours(d.getHours()+2);releaseTime.textContent=d.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})};
-customerSearch.oninput=e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('#customerTable tbody tr').forEach(r=>{const hay=(r.dataset.search||r.textContent).toLowerCase();r.style.display=hay.includes(q)?'':'none'})};document.querySelectorAll('[data-action="neworder"]').forEach(b=>b.onclick=()=>go('neworder'));
-const modal=document.querySelector('#modal'),mc=document.querySelector('#modalContent');document.querySelector('.modal-close').onclick=()=>modal.close();function showModal(title,body){mc.innerHTML=`<h2>${title}</h2>${body}`;modal.showModal()}
-addCustomer.onclick=()=>showModal('Add Customer',`<div class="modal-grid"><label>Name<input></label><label>Phone<input></label><label>City<input></label><label>Email<input type="email"></label><label class="wide">Address<input></label></div><div class="modal-actions"><button class="primary" onclick="modal.close()">Save Customer</button></div>`);newItem.onclick=()=>showModal('Add Item',`<div class="modal-grid"><label>Item Name<input></label><label>Total Qty<input type="number"></label><label class="wide">Description<input></label><label>Unit Price<input type="number" step=".01"></label><label>Active<select><option>Yes</option><option>No</option></select></label></div><div class="modal-actions"><button class="primary" onclick="modal.close()">Save Item</button></div>`);addPayment.onclick=()=>showModal('Add Payment',`<div class="modal-grid"><label>Order<select><option>SR-1025 — Raj Patel</option></select></label><label>Type<select><option>Payment</option><option>Refund</option></select></label><label>Date / Time<input type="datetime-local"></label><label>Amount<input type="number" step=".01"></label><label>Method<select><option>Zelle</option><option>Cash</option><option>Venmo</option><option>Credit Card</option><option>Check</option><option>Other</option></select></label><label>Reference<input></label><label class="wide">Notes<input></label></div><div class="modal-actions"><button class="primary" onclick="modal.close()">Save Payment</button></div>`);
-// Order detail / packing-sheet prototype. In the Firebase version this data will come from Orders, Order_Items and Payments.
-const demoOrders={
- 'SR-1025':{customer:'Raj Patel',phone:'469-555-1212',email:'raj@example.com',orderDate:'Sep 18, 2026',event:'Sep 20, 2026 · 5:00 PM',eventAddress:'456 Event Drive, McKinney, TX',delivery:'Sep 20, 2026 · 1:00 PM',pickup:'Sep 21, 2026 · 10:00 AM',release:'Sep 21, 2026 · 12:00 PM',status:'Confirmed',payment:'Open',items:[['White Resin Chair',60,3],['6\' Rectangle Table',8,12],['20×30 Tent',1,450]],setup:100,deliveryFee:75,discount:50,received:700,notes:'Call customer before delivery. Confirm tent placement on arrival.'},
- 'SR-1026':{customer:'John Smith',phone:'214-555-1313',email:'john@example.com',orderDate:'Sep 18, 2026',event:'Sep 21, 2026 · 6:00 PM',eventAddress:'1200 Celebration Ln, Frisco, TX',delivery:'Sep 21, 2026 · 2:00 PM',pickup:'Sep 22, 2026 · 10:00 AM',release:'Sep 22, 2026 · 12:00 PM',status:'Confirmed',payment:'Settled',items:[['White Resin Chair',40,3],['Cocktail Table',4,15]],setup:50,deliveryFee:50,discount:0,received:280,notes:'Backyard delivery; use side gate.'},
- 'SR-1027':{customer:'Amy Jones',phone:'972-555-1414',email:'amy@example.com',orderDate:'Sep 18, 2026',event:'Sep 22, 2026 · 4:00 PM',eventAddress:'88 Prosper Trail, Prosper, TX',delivery:'Sep 22, 2026 · 11:00 AM',pickup:'Sep 23, 2026 · 9:00 AM',release:'Sep 23, 2026 · 11:00 AM',status:'Confirmed',payment:'Settled',items:[['White Resin Chair',75,3],['6\' Round Table',8,18],['20×30 Tent',1,450]],setup:100,deliveryFee:75,discount:19,received:975,notes:'Tent and tables require setup.'}
-};
-function money(n){return '$'+Number(n||0).toFixed(2)}
-function orderDetailHtml(id){
- const o=demoOrders[id]; if(!o)return '<p>Order details are not available in this prototype.</p>';
- const suggested=o.items.reduce((s,x)=>s+x[1]*x[2],0), total=suggested+o.setup+o.deliveryFee-o.discount, pending=Math.max(0,total-o.received);
- return `<div class="order-detail-head"><div><h2>Order ${id}</h2><p><strong>${o.customer}</strong> · ${o.status} · Payment ${o.payment}</p></div><div class="order-detail-actions"><button class="secondary edit-order-btn" data-edit-order="${id}">Edit Order</button><button class="secondary" onclick="window.print()">Print / Save PDF</button></div></div>
- <div class="order-meta"><div><span>Customer</span><strong>${o.customer}</strong></div><div><span>Phone</span><strong>${o.phone}</strong></div><div><span>Email</span><strong>${o.email}</strong></div><div><span>Order Date</span><strong>${o.orderDate}</strong></div><div><span>Event Date / Time</span><strong>${o.event}</strong></div><div><span>Event Address</span><strong>${o.eventAddress}</strong></div><div><span>Delivery Requested</span><strong>${o.delivery}</strong></div><div><span>Pickup Requested</span><strong>${o.pickup}</strong></div><div><span>Inventory Available</span><strong>${o.release}</strong></div><div><span>Order Status</span><strong>${o.status}</strong></div></div>
- <h3 class="packing-title">Packing List</h3><div class="table-wrap"><table><thead><tr><th>Item</th><th>Qty to Pack</th><th>Unit Price</th><th>Amount</th></tr></thead><tbody>${o.items.map(x=>`<tr><td>${x[0]}</td><td><strong>${x[1]}</strong></td><td>${money(x[2])}</td><td>${money(x[1]*x[2])}</td></tr>`).join('')}</tbody></table></div>
- <div class="order-summary"><div><span>Suggested Price</span><strong>${money(suggested)}</strong></div><div><span>Setup Fee</span><strong>${money(o.setup)}</strong></div><div><span>Delivery Fee</span><strong>${money(o.deliveryFee)}</strong></div><div><span>Discount</span><strong>−${money(o.discount)}</strong></div><div class="grand-total"><span>Total Amount</span><strong>${money(total)}</strong></div><div><span>Amount Received</span><strong>${money(o.received)}</strong></div><div><span>Amount Pending</span><strong>${money(pending)}</strong></div></div>
- <div class="order-notes"><strong>Delivery / Packing Notes</strong><p>${o.notes||'—'}</p></div>`;
+(() => {
+'use strict';
+const cfg=window.SUMEE_SUPABASE;
+const db=window.supabase.createClient(cfg.url,cfg.publishableKey);
+const $=s=>document.querySelector(s), $$=(s,root=document)=>[...root.querySelectorAll(s)];
+const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(n||0));
+const fmt=d=>d?new Date(d).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}):'—';
+const localInput=d=>{const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,16)};
+const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const state={items:[],customers:[],orders:[],partners:[]};
+const modal=$('#modal'), mc=$('#modalContent');
+function toast(msg,error=false){const el=$('#appMessage');el.textContent=msg;el.hidden=false;el.style.background=error?'#fdeaea':'#fff4d6';clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,4500)}
+function showModal(title,html){mc.innerHTML=`<h2>${esc(title)}</h2>${html}`;modal.showModal()}
+$('.modal-close').onclick=()=>modal.close();
+function go(page){$$('.page').forEach(x=>x.classList.remove('active'));$$('.navtab').forEach(x=>x.classList.toggle('active',x.dataset.page===page));$('#'+page)?.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});if(page==='dashboard')loadDashboard();if(page==='customers')loadCustomers();if(page==='items')loadItems();if(page==='receivable')loadReceivables();if(page==='partners')loadPartners();if(page==='neworder')prepareNewOrder();}
+$$('.navtab').forEach(b=>b.onclick=()=>go(b.dataset.page));document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)});
+
+async function requireAdmin(){
+ const {data:{session}}=await db.auth.getSession();
+ if(!session)return false;
+ const {data,error}=await db.from('admin_users').select('user_id,email,active').eq('user_id',session.user.id).maybeSingle();
+ if(error||!data?.active){await db.auth.signOut();return false}
+ $('#adminEmail').textContent=session.user.email;return true;
 }
-function openOrder(id, updateUrl=true){
-  mc.innerHTML=orderDetailHtml(id);
-  if(typeof modal.showModal === 'function') modal.showModal(); else modal.setAttribute('open','');
-  if(updateUrl){const u=new URL(window.location.href);u.searchParams.set('order',id);history.pushState({order:id},'',u)}
+async function boot(){const ok=await requireAdmin();$('#loginScreen').hidden=ok;$('#adminApp').hidden=!ok;if(ok){setDefaults();await Promise.all([loadItems(),loadCustomers()]);await loadDashboard();}}
+$('#loginForm').onsubmit=async e=>{e.preventDefault();$('#loginMessage').textContent='Signing in…';const {error}=await db.auth.signInWithPassword({email:$('#loginEmail').value.trim(),password:$('#loginPassword').value});if(error){$('#loginMessage').textContent=error.message;return}if(!await requireAdmin()){$('#loginMessage').textContent='This account is not authorized as a SuMee admin.';return}$('#loginScreen').hidden=true;$('#adminApp').hidden=false;$('#loginMessage').textContent='';setDefaults();await Promise.all([loadItems(),loadCustomers(),loadDashboard()]);};
+$('#signOut').onclick=async()=>{await db.auth.signOut();location.reload()};
+
+function setDefaults(){const now=new Date(), event=new Date(now);event.setDate(event.getDate()+7);event.setHours(17,0,0,0);const delivery=new Date(event);delivery.setHours(13);const pickup=new Date(event);pickup.setDate(pickup.getDate()+1);pickup.setHours(10);$('#orderEvent').value=localInput(event);$('#orderDelivery').value=localInput(delivery);$('#orderPickup').value=localInput(pickup);$('#availabilityFrom').value=localInput(delivery);$('#availabilityPickup').value=localInput(pickup);updateRelease();}
+function updateRelease(){if(!$('#orderPickup').value)return;const d=new Date($('#orderPickup').value);d.setHours(d.getHours()+2);$('#releaseTime').textContent=fmt(d)}
+$('#orderPickup').addEventListener('change',updateRelease);
+
+async function loadDashboard(){
+ const [{data:k,error:ke},{data:o,error:oe}]=await Promise.all([db.from('vw_dashboard_kpis').select('*').single(),db.from('vw_order_financials').select('*').neq('order_status','Cancelled').order('event_date_time')]);
+ if(ke||oe){toast((ke||oe).message,true);return}
+ $('#ytdRevenue').textContent=money(k.ytd_collected_revenue);$('#outstandingBalance').textContent=money(k.outstanding_balance);state.orders=o||[];
+ const start=new Date();start.setHours(0,0,0,0);const end=new Date(start);end.setDate(end.getDate()+8);
+ const deliveries=o.filter(x=>x.delivery_request_date_time&&new Date(x.delivery_request_date_time)>=start&&new Date(x.delivery_request_date_time)<end&&x.delivery_status!=='Delivered');
+ const pickups=o.filter(x=>x.pickup_request_date_time&&new Date(x.pickup_request_date_time)>=start&&new Date(x.pickup_request_date_time)<end&&x.pickup_status!=='Picked Up');
+ const ids=new Set([...deliveries,...pickups].map(x=>x.order_id));
+ const future=o.filter(x=>new Date(x.event_date_time)>new Date()&&!ids.has(x.order_id)&&!(x.pickup_status==='Picked Up'&&x.final_status==='Settled'));
+ renderDispatch('#upcomingDeliveries',deliveries,'delivery_request_date_time','delivery');renderDispatch('#upcomingPickups',pickups,'pickup_request_date_time','pickup');
+ $('#futureEventsTable tbody').innerHTML=future.length?future.map(x=>`<tr><td><button class="text-btn order-open" data-id="${x.order_id}">${esc(x.order_number)}</button></td><td>${esc(x.customer_name)}</td><td>${fmt(x.event_date_time)}</td><td>${fmt(x.delivery_request_date_time)}</td><td>${fmt(x.pickup_request_date_time)}</td><td>${money(x.amount_pending)}</td><td>${esc(x.order_status)}</td></tr>`).join(''):`<tr><td colspan="7" class="empty-state">No additional future events.</td></tr>`;applyLabels();
 }
-document.addEventListener('click',e=>{
-  const link=e.target.closest('a[data-order-id]');
-  if(link){e.preventDefault();openOrder(link.dataset.orderId);}
+function renderDispatch(sel,rows,dateField,type){$(sel).innerHTML=rows.length?`<div class="dispatch-list">${rows.map(x=>`<div class="dispatch-row"><div><button class="text-btn order-open" data-id="${x.order_id}"><strong>${esc(x.order_number)}</strong></button> — ${esc(x.customer_name)}<small>${fmt(x[dateField])}</small></div><button class="secondary fulfill" data-id="${x.order_id}" data-type="${type}">${type==='delivery'?'Mark Delivered':'Mark Picked Up'}</button></div>`).join('')}</div>`:`<div class="empty-state">Nothing scheduled.</div>`}
+
+async function loadCustomers(){const {data,error}=await db.from('vw_customer_lifetime_value').select('*').order('customer_name');if(error){toast(error.message,true);return}state.customers=data||[];renderCustomers();fillCustomerSelect();}
+function renderCustomers(){const q=$('#customerSearch').value.toLowerCase();const rows=state.customers.filter(c=>`${c.customer_name} ${c.phone} ${c.email} ${c.city}`.toLowerCase().includes(q));$('#customerTable tbody').innerHTML=rows.length?rows.map(c=>`<tr><td>${esc(c.customer_name)}</td><td>${esc(c.phone)}</td><td><strong>${money(c.lifetime_value)}</strong></td><td class="customer-actions"><button class="text-btn customer-edit" data-id="${c.customer_id}">View/Edit Customer</button><button class="text-btn customer-new-order" data-id="${c.customer_id}">New Order</button><button class="text-btn customer-orders" data-id="${c.customer_id}">View/Edit Orders</button><button class="text-btn customer-payments" data-id="${c.customer_id}">Add/Edit Payments</button></td></tr>`).join(''):`<tr><td colspan="4" class="empty-state">No customers found.</td></tr>`;applyLabels()}
+$('#customerSearch').oninput=renderCustomers;
+function fillCustomerSelect(selected){$('#orderCustomer').innerHTML=state.customers.map(c=>`<option value="${c.customer_id}" ${String(c.customer_id)===String(selected)?'selected':''}>${esc(c.customer_name)} — ${esc(c.phone)}</option>`).join('')}
+$('#addCustomer').onclick=()=>customerEditor();
+function customerEditor(c={}){showModal(c.customer_id?'Edit Customer':'Add Customer',`<form id="customerForm" class="modal-grid"><label>Name<input name="customer_name" required value="${esc(c.customer_name)}"></label><label>Phone<input name="phone" required value="${esc(c.phone)}"></label><label>Email<input name="email" type="email" value="${esc(c.email)}"></label><label>City<input name="city" value="${esc(c.city)}"></label><label class="wide">Address<input name="address" value="${esc(c.address)}"></label><label>State<input name="state" value="${esc(c.state||'TX')}"></label><label>ZIP<input name="zip_code" value="${esc(c.zip_code)}"></label><div class="modal-actions wide"><button class="primary" type="submit">Save Customer</button></div></form>`);$('#customerForm').onsubmit=async e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target));const q=c.customer_id?db.from('customers').update(v).eq('customer_id',c.customer_id):db.from('customers').insert(v);const {error}=await q;if(error)return toast(error.message,true);modal.close();toast('Customer saved.');await loadCustomers();}}
+
+async function loadItems(){const {data,error}=await db.from('items').select('*').order('item_name');if(error){toast(error.message,true);return}state.items=data||[];$('#itemsBody').innerHTML=state.items.length?state.items.map(i=>`<tr><td>${esc(i.item_name)}</td><td>${esc(i.description)}</td><td>${i.qty_on_hand}</td><td>${money(i.unit_price)}</td><td><span class="status-pill ${i.active?'yes':'no'}">${i.active?'Yes':'No'}</span></td><td><button class="text-btn item-edit" data-id="${i.item_id}">Edit</button></td></tr>`).join(''):`<tr><td colspan="6" class="empty-state">No items.</td></tr>`;applyLabels()}
+$('#newItem').onclick=()=>itemEditor();
+function itemEditor(i={}){showModal(i.item_id?'Edit Item':'Add Item',`<form id="itemForm" class="modal-grid"><label>Item Name<input name="item_name" required value="${esc(i.item_name)}"></label><label>Total Qty<input name="qty_on_hand" type="number" min="0" required value="${i.qty_on_hand??0}"></label><label class="wide">Description<input name="description" value="${esc(i.description)}"></label><label>Unit Price<input name="unit_price" type="number" min="0" step=".01" required value="${i.unit_price??0}"></label><label>Active<select name="active"><option value="true" ${i.active!==false?'selected':''}>Yes</option><option value="false" ${i.active===false?'selected':''}>No</option></select></label><div class="modal-actions wide"><button class="primary" type="submit">Save Item</button></div></form>`);$('#itemForm').onsubmit=async e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target));v.qty_on_hand=+v.qty_on_hand;v.unit_price=+v.unit_price;v.active=v.active==='true';const q=i.item_id?db.from('items').update(v).eq('item_id',i.item_id):db.from('items').insert(v);const {error}=await q;if(error)return toast(error.message,true);modal.close();toast('Item saved.');await loadItems();}}
+
+async function checkAvailability(){const from=$('#availabilityFrom').value,pickup=$('#availabilityPickup').value;if(!from||!pickup)return toast('Choose both dates.',true);const {data,error}=await db.rpc('check_inventory_availability',{p_delivery_date_time:new Date(from).toISOString(),p_pickup_date_time:new Date(pickup).toISOString()});if(error)return toast(error.message,true);$('#availabilityBody').innerHTML=data.map(i=>`<tr><td>${esc(i.item_name)}</td><td>${i.qty_on_hand}</td><td>${i.qty_reserved}</td><td><strong class="${i.qty_available<=0?'danger':''}">${i.qty_available}</strong></td></tr>`).join('');applyLabels()}
+$('#checkAvailability').onclick=checkAvailability;
+
+function prepareNewOrder(customerId){fillCustomerSelect(customerId);$('#orderItems tbody').innerHTML='';addOrderLine();recalcOrder();}
+function addOrderLine(){const active=state.items.filter(i=>i.active);if(!active.length)return;const i=active[0];$('#orderItems tbody').insertAdjacentHTML('beforeend',`<tr><td><select class="oi-item">${active.map(x=>`<option value="${x.item_id}">${esc(x.item_name)}</option>`).join('')}</select></td><td class="oi-avail">${i.qty_on_hand}</td><td><input class="oi-qty" type="number" min="1" value="1"></td><td><input class="oi-price" type="number" min="0" step=".01" value="${i.unit_price}"></td><td class="oi-amount">${money(i.unit_price)}</td><td><button type="button" class="text-btn oi-remove">Remove</button></td></tr>`);recalcOrder();applyLabels()}
+$('#addItem').onclick=addOrderLine;
+function recalcOrder(){let s=0;$$('#orderItems tbody tr').forEach(r=>{const q=+r.querySelector('.oi-qty').value||0,p=+r.querySelector('.oi-price').value||0;s+=q*p;r.querySelector('.oi-amount').textContent=money(q*p)});const total=s+(+$('#setup').value||0)+(+$('#deliveryFee').value||0)-(+$('#discount').value||0);$('#suggested').textContent=money(s);$('#total').textContent=money(total)}
+document.addEventListener('input',e=>{if(e.target.matches('.oi-qty,.oi-price,#setup,#deliveryFee,#discount'))recalcOrder()});
+document.addEventListener('change',e=>{if(e.target.matches('.oi-item')){const r=e.target.closest('tr'),i=state.items.find(x=>String(x.item_id)===e.target.value);r.querySelector('.oi-avail').textContent=i.qty_on_hand;r.querySelector('.oi-price').value=i.unit_price;recalcOrder()}});
+document.addEventListener('click',e=>{if(e.target.closest('.oi-remove')){e.target.closest('tr').remove();recalcOrder()}});
+async function saveOrder(status){const rows=$$('#orderItems tbody tr');if(!rows.length)return toast('Add at least one rental item.',true);const order={customer_id:+$('#orderCustomer').value,event_date_time:new Date($('#orderEvent').value).toISOString(),event_address:$('#orderAddress').value.trim()||null,event_city:$('#orderCity').value.trim()||null,delivery_request_date_time:new Date($('#orderDelivery').value).toISOString(),pickup_request_date_time:new Date($('#orderPickup').value).toISOString(),setup_fee:+$('#setup').value||0,delivery_fee:+$('#deliveryFee').value||0,discount_amount:+$('#discount').value||0,order_status:status,notes:$('#orderNotes').value.trim()||null};const {data:o,error}=await db.from('orders').insert(order).select('order_id,order_number').single();if(error)return toast(error.message,true);const lines=rows.map(r=>({order_id:o.order_id,item_id:+r.querySelector('.oi-item').value,quantity:+r.querySelector('.oi-qty').value,unit_price:+r.querySelector('.oi-price').value}));const {error:ie}=await db.from('order_items').insert(lines);if(ie)return toast(`Order ${o.order_number} was created, but items failed: ${ie.message}`,true);toast(`${o.order_number} saved as ${status}.`);resetOrderForm();await Promise.all([loadDashboard(),loadReceivables()]);go('dashboard')}
+function resetOrderForm(){$('#orderAddress').value='';$('#orderCity').value='';$('#setup').value=0;$('#deliveryFee').value=0;$('#discount').value=0;$('#orderNotes').value='';setDefaults();prepareNewOrder()}
+$('#saveDraft').onclick=()=>saveOrder('Draft');$('#confirmOrder').onclick=()=>saveOrder('Confirmed');
+
+async function loadReceivables(){const {data,error}=await db.from('vw_receivables').select('*').order('event_date_time',{ascending:false});if(error){toast(error.message,true);return}state.receivables=data||[];renderReceivables()}
+function renderReceivables(){const q=$('#receivableSearch').value.toLowerCase();const r=state.receivables.filter(x=>`${x.customer_name} ${x.phone} ${x.email} ${x.city}`.toLowerCase().includes(q));$('#receivableTable tbody').innerHTML=r.length?r.map(x=>`<tr><td>${fmt(x.event_date_time)}</td><td>${fmt(x.pickup_request_date_time)}</td><td><button class="text-btn order-open" data-id="${x.order_id}">${esc(x.order_number)}</button></td><td>${esc(x.customer_name)}</td><td>${esc(x.phone)}</td><td>${money(x.order_total)}</td><td>${money(x.amount_paid)}</td><td><strong class="danger">${money(x.amount_pending)}</strong></td></tr>`).join(''):`<tr><td colspan="8" class="empty-state">No outstanding receivables.</td></tr>`;applyLabels()}
+$('#receivableSearch').oninput=renderReceivables;$('#addPayment').onclick=()=>paymentEditor();
+async function paymentEditor(customerId,orderId){let q=db.from('vw_order_financials').select('order_id,order_number,customer_id,customer_name,amount_pending').neq('order_status','Cancelled').order('event_date_time',{ascending:false});if(customerId)q=q.eq('customer_id',customerId);const {data,error}=await q;if(error)return toast(error.message,true);showModal('Add Payment',`<form id="paymentForm" class="modal-grid"><label>Order<select name="order_id">${data.map(o=>`<option value="${o.order_id}" ${String(o.order_id)===String(orderId)?'selected':''}>${esc(o.order_number)} — ${esc(o.customer_name)} — ${money(o.amount_pending)} due</option>`).join('')}</select></label><label>Type<select name="transaction_type"><option>Payment</option><option>Refund</option></select></label><label>Date / Time<input name="payment_date_time" type="datetime-local" value="${localInput(new Date())}"></label><label>Amount<input name="amount" type="number" min=".01" step=".01" required></label><label>Method<select name="payment_method"><option>Zelle</option><option>Cash</option><option>Venmo</option><option>Credit Card</option><option>Check</option><option>Other</option></select></label><label>Reference<input name="reference_number"></label><label class="wide">Notes<input name="notes"></label><div class="modal-actions wide"><button class="primary" type="submit">Save Payment</button></div></form>`);$('#paymentForm').onsubmit=async e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target));v.order_id=+v.order_id;v.amount=+v.amount;v.payment_date_time=new Date(v.payment_date_time).toISOString();const {error}=await db.from('payments').insert(v);if(error)return toast(error.message,true);modal.close();toast('Payment saved.');await Promise.all([loadReceivables(),loadDashboard(),loadCustomers()]);}}
+
+async function openOrder(orderId){const [{data:o,error},{data:lines},{data:pays}]=await Promise.all([db.from('vw_order_financials').select('*').eq('order_id',orderId).single(),db.from('order_items').select('order_item_id,item_id,quantity,unit_price,items(item_name)').eq('order_id',orderId),db.from('payments').select('*').eq('order_id',orderId).order('payment_date_time',{ascending:false})]);if(error)return toast(error.message,true);showModal(`Order ${o.order_number}`,`<div class="order-detail-head"><div><p><strong>${esc(o.customer_name)}</strong> · ${esc(o.order_status)} · ${esc(o.final_status)}</p></div><div class="order-detail-actions"><button class="secondary" onclick="window.print()">Print / Save PDF</button></div></div><div class="order-meta"><div><span>Phone</span><strong>${esc(o.phone)}</strong></div><div><span>Email</span><strong>${esc(o.email)}</strong></div><div><span>Event</span><strong>${fmt(o.event_date_time)}</strong></div><div><span>Delivery</span><strong>${fmt(o.delivery_request_date_time)}</strong></div><div><span>Pickup</span><strong>${fmt(o.pickup_request_date_time)}</strong></div><div><span>Balance</span><strong>${money(o.amount_pending)}</strong></div></div><h3>Packing List</h3><div class="table-wrap"><table><thead><tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Amount</th></tr></thead><tbody>${lines.map(x=>`<tr><td>${esc(x.items?.item_name)}</td><td><strong>${x.quantity}</strong></td><td>${money(x.unit_price)}</td><td>${money(x.quantity*x.unit_price)}</td></tr>`).join('')}</tbody></table></div><div class="order-summary"><div><span>Suggested Price</span><strong>${money(o.suggested_price)}</strong></div><div><span>Setup Fee</span><strong>${money(o.setup_fee)}</strong></div><div><span>Delivery Fee</span><strong>${money(o.delivery_fee)}</strong></div><div><span>Discount</span><strong>−${money(o.discount_amount)}</strong></div><div class="grand-total"><span>Total</span><strong>${money(o.total_amount)}</strong></div><div><span>Received</span><strong>${money(o.amount_received)}</strong></div><div><span>Pending</span><strong>${money(o.amount_pending)}</strong></div></div><h3>Payments</h3>${pays.length?pays.map(p=>`<p>${fmt(p.payment_date_time)} — ${esc(p.transaction_type)} ${money(p.amount)} (${esc(p.payment_method||'')})</p>`).join(''):'<p>No payments yet.</p>'}<div class="modal-actions"><button class="secondary order-add-payment" data-id="${o.order_id}" data-customer="${o.customer_id}">Add Payment</button></div>`);applyLabels(mc)}
+
+async function loadPartners(){const {data,error}=await db.from('partners').select('*').order('display_order').order('business_name');if(error){toast(error.message,true);return}state.partners=data||[];renderPartners()}
+function renderPartners(){const q=$('#partnerSearch').value.toLowerCase();const r=state.partners.filter(p=>`${p.business_name} ${p.category} ${p.contact_name} ${p.service_areas}`.toLowerCase().includes(q));$('#partnersTable tbody').innerHTML=r.length?r.map(p=>`<tr><td>${esc(p.business_name)}</td><td>${esc(p.category)}</td><td>${esc(p.phone)}</td><td>${p.featured?'Yes':'No'}</td><td>${p.active?'Yes':'No'}</td><td>${p.display_order}</td><td class="partner-actions"><button class="text-btn partner-edit" data-id="${p.partner_id}">Edit</button></td></tr>`).join(''):`<tr><td colspan="7" class="empty-state">No partners yet.</td></tr>`;applyLabels()}
+$('#partnerSearch').oninput=renderPartners;$('#newPartner').onclick=()=>partnerEditor();
+function partnerEditor(p={}){showModal(p.partner_id?'Edit Partner':'Add Partner',`<form id="partnerForm" class="modal-grid"><label>Business Name<input name="business_name" required value="${esc(p.business_name)}"></label><label>Category<input name="category" required placeholder="Photographer, Decorator, Henna Artist..." value="${esc(p.category)}"></label><label>Contact Name<input name="contact_name" value="${esc(p.contact_name)}"></label><label>Phone<input name="phone" value="${esc(p.phone)}"></label><label>Email<input name="email" type="email" value="${esc(p.email)}"></label><label>Website<input name="website_url" value="${esc(p.website_url)}"></label><label>Instagram<input name="instagram_url" value="${esc(p.instagram_url)}"></label><label>Facebook<input name="facebook_url" value="${esc(p.facebook_url)}"></label><label class="wide">Service Areas<input name="service_areas" value="${esc(p.service_areas)}"></label><label class="wide">Description<textarea name="description">${esc(p.description)}</textarea></label><label class="wide">Image URL<input name="image_url" value="${esc(p.image_url)}"></label><label>Featured<select name="featured"><option value="false" ${!p.featured?'selected':''}>No</option><option value="true" ${p.featured?'selected':''}>Yes</option></select></label><label>Active<select name="active"><option value="true" ${p.active!==false?'selected':''}>Yes</option><option value="false" ${p.active===false?'selected':''}>No</option></select></label><label>Display Order<input name="display_order" type="number" min="0" value="${p.display_order??0}"></label><div class="modal-actions wide"><button class="primary" type="submit">Save Partner</button></div></form>`);$('#partnerForm').onsubmit=async e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target));v.featured=v.featured==='true';v.active=v.active==='true';v.display_order=+v.display_order||0;const q=p.partner_id?db.from('partners').update(v).eq('partner_id',p.partner_id):db.from('partners').insert(v);const {error}=await q;if(error)return toast(error.message,true);modal.close();toast('Partner saved.');await loadPartners();}}
+
+document.addEventListener('click',async e=>{
+ const ce=e.target.closest('.customer-edit');if(ce)return customerEditor(state.customers.find(c=>String(c.customer_id)===ce.dataset.id));
+ const cn=e.target.closest('.customer-new-order');if(cn){go('neworder');prepareNewOrder(cn.dataset.id);return}
+ const co=e.target.closest('.customer-orders');if(co){const {data,error}=await db.from('vw_order_financials').select('*').eq('customer_id',co.dataset.id).order('event_date_time',{ascending:false});if(error)return toast(error.message,true);showModal('Customer Orders',data.length?`<div class="table-wrap"><table><thead><tr><th>Event</th><th>Order</th><th>Total</th><th>Balance</th></tr></thead><tbody>${data.map(o=>`<tr><td>${fmt(o.event_date_time)}</td><td><button class="text-btn order-open" data-id="${o.order_id}">${esc(o.order_number)}</button></td><td>${money(o.total_amount)}</td><td>${money(o.amount_pending)}</td></tr>`).join('')}</tbody></table></div>`:'<p>No orders.</p>');applyLabels(mc);return}
+ const cp=e.target.closest('.customer-payments');if(cp)return paymentEditor(cp.dataset.id);
+ const ie=e.target.closest('.item-edit');if(ie)return itemEditor(state.items.find(i=>String(i.item_id)===ie.dataset.id));
+ const pe=e.target.closest('.partner-edit');if(pe)return partnerEditor(state.partners.find(p=>String(p.partner_id)===pe.dataset.id));
+ const oo=e.target.closest('.order-open');if(oo)return openOrder(+oo.dataset.id);
+ const op=e.target.closest('.order-add-payment');if(op){modal.close();return paymentEditor(op.dataset.customer,op.dataset.id)}
+ const f=e.target.closest('.fulfill');if(f){const now=new Date().toISOString(),update=f.dataset.type==='delivery'?{delivery_status:'Delivered',actual_delivery_date_time:now}:{pickup_status:'Picked Up',actual_pickup_date_time:now};const {error}=await db.from('orders').update(update).eq('order_id',f.dataset.id);if(error)return toast(error.message,true);toast(f.dataset.type==='delivery'?'Order marked delivered.':'Order marked picked up.');return loadDashboard()}
 });
-modal.addEventListener('close',()=>{const u=new URL(window.location.href);if(u.searchParams.has('order')){u.searchParams.delete('order');history.replaceState({},'',u)}});
-window.addEventListener('popstate',()=>{const id=new URL(window.location.href).searchParams.get('order');if(id)openOrder(id,false);else if(modal.open)modal.close()});
-const initialOrder=new URL(window.location.href).searchParams.get('order');if(initialOrder)openOrder(initialOrder,false);
 
-
-// Mobile table labels: make every table readable as stacked cards on narrow screens.
-function applyMobileTableLabels(root=document){
-  root.querySelectorAll('table').forEach(table => {
-    const headers=[...table.querySelectorAll('thead th')].map(th=>th.textContent.trim());
-    table.querySelectorAll('tbody tr').forEach(row => {
-      [...row.children].forEach((cell,i)=>{
-        if(cell.tagName==='TD') cell.setAttribute('data-label', headers[i] || '');
-      });
-    });
-  });
-}
-applyMobileTableLabels();
-const mobileTableObserver=new MutationObserver(()=>applyMobileTableLabels());
-mobileTableObserver.observe(document.body,{childList:true,subtree:true});
-
-// v5: fulfillment tracking for prototype. Firebase will persist these fields later.
-const fulfillmentState={};
-function fulfillmentHtml(id,o){
- const f=fulfillmentState[id]||{};
- return `<div class="fulfillment"><h3>Order Fulfillment</h3><div class="fulfillment-grid">
- <div class="fulfill-card"><span>Delivery Requested</span><strong>${o.delivery}</strong>${f.delivered?`<div class="fulfill-status">✓ Delivered — ${f.delivered}</div><button class="secondary fulfill-action" data-fulfill="undo-delivery" data-id="${id}">Undo / Correct Delivery</button>`:`<button class="primary fulfill-action" data-fulfill="delivery" data-id="${id}">✓ Mark as Delivered</button><div class="fulfill-status">Not delivered yet</div>`}</div>
- <div class="fulfill-card"><span>Pickup Requested</span><strong>${o.pickup}</strong>${f.picked?`<div class="fulfill-status">✓ Picked Up — ${f.picked}</div><button class="secondary fulfill-action" data-fulfill="undo-pickup" data-id="${id}">Undo / Correct Pickup</button>`:`<button class="primary fulfill-action" data-fulfill="pickup" data-id="${id}">✓ Mark as Picked Up</button><div class="fulfill-status">Not picked up yet</div>`}</div>
- </div></div>`;
-}
-const originalOrderDetailHtml=orderDetailHtml;
-orderDetailHtml=function(id){
- const html=originalOrderDetailHtml(id),o=demoOrders[id];
- if(!o)return html;
- const marker='<h3 class="packing-title">Packing List</h3>';
- return html.replace(marker,fulfillmentHtml(id,o)+marker);
-};
-function stampNow(){return new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});}
-document.addEventListener('click',e=>{
- const b=e.target.closest('.fulfill-action'); if(!b)return;
- const id=b.dataset.id, action=b.dataset.fulfill; fulfillmentState[id] ||= {};
- const msg=action==='delivery'?'Mark this order as delivered?':action==='pickup'?'Mark this order as picked up?':'Undo this fulfillment status?';
- if(!confirm(msg))return;
- if(action==='delivery')fulfillmentState[id].delivered=stampNow();
- if(action==='pickup')fulfillmentState[id].picked=stampNow();
- if(action==='undo-delivery')delete fulfillmentState[id].delivered;
- if(action==='undo-pickup')delete fulfillmentState[id].picked;
- mc.innerHTML=orderDetailHtml(id); applyMobileTableLabels(mc);
-});
-
-// Dashboard v9: 7-day dispatch windows, non-duplicated future events, and 2 KPI tiles.
-(function renderDashboardV9(){
-  const todayStart=new Date(); todayStart.setHours(0,0,0,0);
-  const windowEnd=new Date(todayStart); windowEnd.setDate(windowEnd.getDate()+7); windowEnd.setHours(23,59,59,999);
-  const parseDemoDate=(value)=>{ const d=new Date(value.replace(' · ', ' ')); return isNaN(d)?null:d; };
-  const orderRows=Object.entries(demoOrders).map(([id,o])=>{
-    const itemSubtotal=o.items.reduce((s,x)=>s+x[1]*x[2],0);
-    const total=itemSubtotal+o.setup+o.deliveryFee-o.discount;
-    const balance=Math.max(0,total-o.received);
-    return {id,o,event:parseDemoDate(o.event),delivery:parseDemoDate(o.delivery),pickup:parseDemoDate(o.pickup),total,balance};
-  });
-  const in7=d=>d && d>=todayStart && d<=windowEnd;
-  const fstate=id=>fulfillmentState[id]||{};
-  const deliveries=orderRows.filter(r=>in7(r.delivery) && !fstate(r.id).delivered).sort((a,b)=>a.delivery-b.delivery);
-  const pickups=orderRows.filter(r=>in7(r.pickup) && !fstate(r.id).picked).sort((a,b)=>a.pickup-b.pickup);
-  const dispatchIds=new Set([...deliveries,...pickups].map(r=>r.id));
-  const future=orderRows.filter(r=>r.event && r.event>=todayStart && !dispatchIds.has(r.id)).sort((a,b)=>a.event-b.event);
-  const fmt=d=>d?d.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'—';
-  const deliveryBox=document.querySelector('#upcomingDeliveries');
-  const pickupBox=document.querySelector('#upcomingPickups');
-  if(deliveryBox) deliveryBox.innerHTML=deliveries.length?deliveries.map(r=>`<div class="dispatch-item"><a class="order-link" href="?order=${r.id}" data-order-id="${r.id}">${r.id}</a> · ${r.o.customer}<small>${fmt(r.delivery)} · ${r.o.eventAddress.split(',').slice(-2,-1)[0].trim()} · Pending</small></div>`).join(''):'<div class="empty-dashboard">No deliveries in the next 7 days.</div>';
-  if(pickupBox) pickupBox.innerHTML=pickups.length?pickups.map(r=>`<div class="dispatch-item"><a class="order-link" href="?order=${r.id}" data-order-id="${r.id}">${r.id}</a> · ${r.o.customer}<small>${fmt(r.pickup)} · ${r.o.eventAddress.split(',').slice(-2,-1)[0].trim()} · Pending</small></div>`).join(''):'<div class="empty-dashboard">No pickups in the next 7 days.</div>';
-  const body=document.querySelector('#futureEventsTable tbody');
-  if(body) body.innerHTML=future.length?future.map(r=>`<tr><td><a class="order-link" href="?order=${r.id}" data-order-id="${r.id}">${r.id}</a></td><td>${r.o.customer}</td><td>${fmt(r.event)}</td><td>${fmt(r.delivery)}</td><td>${fmt(r.pickup)}</td><td>${money(r.balance)}</td><td><span class="pill ${r.balance<=0?'settled':'confirmed'}">${r.balance<=0?'Settled':r.o.status}</span></td></tr>`).join(''):'<tr><td colspan="7">No additional future events.</td></tr>';
-  // Prototype KPI calculation: collected revenue is amount received on demo orders; outstanding is remaining balance on active/pending orders.
-  const ytd=orderRows.reduce((s,r)=>s+Number(r.o.received||0),0);
-  const outstanding=orderRows.reduce((s,r)=>s+r.balance,0);
-  const yr=document.querySelector('#ytdRevenue'), ob=document.querySelector('#outstandingBalance');
-  if(yr) yr.textContent=money(ytd); if(ob) ob.textContent=money(outstanding);
-  applyMobileTableLabels(document.querySelector('#dashboard'));
+function applyLabels(root=document){root.querySelectorAll('table').forEach(t=>{const h=$$('thead th',t);t.querySelectorAll('tbody tr').forEach(r=>[...r.children].forEach((c,i)=>{if(c.tagName==='TD')c.dataset.label=h[i]?.textContent.trim()||''}))})}
+boot();
 })();
-
-// v10 customer/order/receivable workflows
-const customerData={'Raj Patel':{name:'Raj Patel',phone:'469-555-1212',email:'raj@example.com',address:'456 Event Drive',city:'McKinney'},'John Smith':{name:'John Smith',phone:'214-555-1313',email:'john@example.com',address:'1200 Celebration Ln',city:'Frisco'},
- 'Amy Jones':{name:'Amy Jones',phone:'972-555-1414',email:'amy@example.com',address:'88 Prosper Trail',city:'Prosper'}};
-document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const action=b.dataset.action,customer=b.dataset.customer;if(action==='customer'&&customer){const c=customerData[customer];showModal('View / Edit Customer',`<div class="modal-grid"><label>Name<input value="${c.name}"></label><label>Phone<input value="${c.phone}"></label><label>Email<input type="email" value="${c.email}"></label><label>City<input value="${c.city}"></label><label class="wide">Address<input value="${c.address}"></label></div><div class="modal-actions"><button class="primary" onclick="modal.close()">Save Changes</button></div>`)}if(action==='neworder'&&customer){go('neworder');const sel=document.querySelector('#neworder select');if(sel){[...sel.options].forEach(o=>{if(o.textContent.trim()===customer)sel.value=o.value})}}if(action==='orders'&&customer){go('orderlist');const input=document.querySelector('#orderSearch');if(input){input.value=customer;input.dispatchEvent(new Event('input'))}}if(action==='payments'&&customer){openCustomerPayments(customer)}});
-function filterRows(inputId,tableId){const input=document.getElementById(inputId);if(!input)return;input.addEventListener('input',()=>{const q=input.value.toLowerCase();document.querySelectorAll(`#${tableId} tbody tr`).forEach(r=>{const hay=(r.dataset.search||r.textContent).toLowerCase();r.style.display=hay.includes(q)?'':'none'})})}filterRows('receivableSearch','receivableTable');filterRows('orderSearch','ordersTable');['receivableTable','ordersTable'].forEach(id=>{const table=document.getElementById(id);if(!table)return;const body=table.tBodies[0];[...body.rows].sort((a,b)=>(b.dataset.event||'').localeCompare(a.dataset.event||'')).forEach(r=>body.appendChild(r))});
-
-
-// v11 validation/demo interactions — all controls are wired for prototype testing.
-function toast(message){
- let t=document.getElementById('demoToast');
- if(!t){t=document.createElement('div');t.id='demoToast';t.className='demo-toast';document.body.appendChild(t)}
- t.textContent=message;t.classList.add('show');clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
-}
-
-// Availability demo recalculation.
-document.getElementById('checkAvailability')?.addEventListener('click',()=>{
- const rows=document.querySelectorAll('#availability tbody tr');
- const reserved=[60,10,1];
- rows.forEach((r,i)=>{const cells=r.querySelectorAll('td');const total=Number(cells[1].textContent);cells[2].textContent=reserved[i];cells[3].innerHTML=`<strong${total-reserved[i]===0?' class="danger"':''}>${total-reserved[i]}</strong>`});
- applyMobileTableLabels(document.getElementById('availability'));toast('Sample availability refreshed for the selected rental window.');
-});
-
-// New Order demo actions.
-document.getElementById('saveDraft')?.addEventListener('click',()=>toast('Draft SR-1028 saved in this demo.'));
-document.getElementById('confirmOrder')?.addEventListener('click',()=>toast('SR-1028 confirmed in this demo.'));
-
-// Add customer demo: prefilled values and functional save.
-if(document.getElementById('addCustomer')) document.getElementById('addCustomer').onclick=()=>showModal('Add Customer',`<div class="modal-grid"><label>Name<input value="Priya Shah"></label><label>Phone<input value="469-555-1515"></label><label>City<input value="Plano"></label><label>Email<input type="email" value="priya@example.com"></label><label class="wide">Address<input value="725 Legacy Drive"></label></div><div class="modal-actions"><button class="primary" id="demoSaveCustomer">Save Customer</button></div>`);
-document.addEventListener('click',e=>{if(e.target.id==='demoSaveCustomer'){modal.close();toast('Sample customer saved.')}});
-
-// Customer edit save button is functional in prototype.
-document.addEventListener('click',e=>{if(e.target.closest('#modal .modal-actions .primary') && mc.querySelector('h2')?.textContent.includes('View / Edit Customer')){setTimeout(()=>toast('Customer changes saved in this demo.'),0)}});
-
-function openCustomerPayments(customer){
- const map={
-  'Raj Patel':[['Sep 18, 2026','SR-1025','Zelle',300],['Sep 19, 2026','SR-1025','Cash',400]],
-  'John Smith':[['Sep 18, 2026','SR-1026','Zelle',280]],
-  'Amy Jones':[['Sep 18, 2026','SR-1027','Credit Card',975]]
- };
- const rows=(map[customer]||[]).map((p,i)=>`<tr><td>${p[0]}</td><td><a class="order-link" href="?order=${p[1]}" data-order-id="${p[1]}">${p[1]}</a></td><td>${p[2]}</td><td>${money(p[3])}</td><td><button class="text-btn demo-edit-payment" data-customer="${customer}" data-payment="${i}">Edit</button></td></tr>`).join('');
- showModal(`${customer} — Payments`,`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Order</th><th>Method</th><th>Amount</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div><div class="modal-actions"><button class="secondary" onclick="modal.close()">Close</button><button class="primary demo-add-payment" data-customer="${customer}">+ Add Payment</button></div>`);applyMobileTableLabels(mc);
-}
-function paymentEditor(customer,title='Add Payment',amount='100.00'){
- showModal(title,`<div class="modal-grid"><label>Customer<input value="${customer}" readonly></label><label>Order<select><option>SR-1025</option><option>SR-1026</option><option>SR-1027</option></select></label><label>Date / Time<input type="datetime-local" value="2026-09-19T13:30"></label><label>Amount<input type="number" step=".01" value="${amount}"></label><label>Method<select><option>Zelle</option><option>Cash</option><option>Venmo</option><option>Credit Card</option><option>Check</option></select></label><label>Reference<input value="Sample payment"></label></div><div class="modal-actions"><button class="primary demo-save-payment">Save Payment</button></div>`);
-}
-document.addEventListener('click',e=>{
- const add=e.target.closest('.demo-add-payment');if(add){paymentEditor(add.dataset.customer);return}
- const edit=e.target.closest('.demo-edit-payment');if(edit){paymentEditor(edit.dataset.customer,'Edit Payment','300.00');return}
- if(e.target.closest('.demo-save-payment')){modal.close();toast('Payment saved in this demo.');return}
-});
-
-// Top Receivable Add Payment is also functional and prefilled.
-if(document.getElementById('addPayment')) document.getElementById('addPayment').onclick=()=>paymentEditor('Raj Patel');
-
-// Item add/edit demo.
-if(document.getElementById('newItem')) document.getElementById('newItem').onclick=()=>showModal('Add Item',`<div class="modal-grid"><label>Item Name<input value="White Folding Chair"></label><label>Total Qty<input type="number" value="50"></label><label class="wide">Description<input value="Sample inventory item"></label><label>Unit Price<input type="number" step=".01" value="3.50"></label><label>Active<select><option>Yes</option><option>No</option></select></label></div><div class="modal-actions"><button class="primary demo-save-item">Save Item</button></div>`);
-document.addEventListener('click',e=>{
- const edit=e.target.closest('.item-edit');if(edit){const it=items.find(x=>x.id===edit.dataset.itemId);showModal('Edit Item',`<div class="modal-grid"><label>Item Name<input value="${it.name}"></label><label>Total Qty<input type="number" value="${it.qty}"></label><label class="wide">Description<input value="${it.desc}"></label><label>Unit Price<input type="number" step=".01" value="${it.price}"></label><label>Active<select><option>Yes</option><option>No</option></select></label></div><div class="modal-actions"><button class="primary demo-save-item">Save Changes</button></div>`);return}
- if(e.target.closest('.demo-save-item')){modal.close();toast('Item saved in this demo.');}
-});
-
-// Order edit from linked order detail.
-document.addEventListener('click',e=>{
- const b=e.target.closest('.edit-order-btn');if(!b)return;
- const id=b.dataset.editOrder,o=demoOrders[id];
- showModal(`Edit Order ${id}`,`<div class="modal-grid"><label>Customer<input value="${o.customer}"></label><label>Status<select><option selected>${o.status}</option><option>Draft</option><option>Cancelled</option></select></label><label>Event Date / Time<input value="${o.event}"></label><label>Delivery<input value="${o.delivery}"></label><label>Pickup<input value="${o.pickup}"></label><label class="wide">Event Address<input value="${o.eventAddress}"></label><label class="wide">Notes<input value="${o.notes}"></label></div><div class="modal-actions"><button class="primary demo-save-order">Save Order Changes</button></div>`);
-});
-document.addEventListener('click',e=>{if(e.target.closest('.demo-save-order')){modal.close();toast('Order changes saved in this demo.')}});
-
-// Modal X works even after dynamic content changes.
-document.querySelector('.modal-close')?.addEventListener('click',()=>modal.close());
-
-// v12: Full Edit Order screen mirrors New Order item/pricing controls.
-function orderEditHtml(id){
- const o=demoOrders[id]; if(!o)return '<p>Order not found.</p>';
- return `<h2>Edit Order ${id}</h2>
- <div class="order-edit-grid">
-  <label>Customer<input id="editCustomer" value="${o.customer}"></label>
-  <label>Order Status<select id="editStatus"><option ${o.status==='Draft'?'selected':''}>Draft</option><option ${o.status==='Confirmed'?'selected':''}>Confirmed</option><option ${o.status==='Cancelled'?'selected':''}>Cancelled</option></select></label>
-  <label>Event Date / Time<input id="editEvent" value="${o.event}"></label>
-  <label>Delivery Requested<input id="editDelivery" value="${o.delivery}"></label>
-  <label>Pickup Requested<input id="editPickup" value="${o.pickup}"></label>
-  <label class="wide">Event Address<input id="editAddress" value="${o.eventAddress}"></label>
- </div>
- <h3>Rental Items</h3>
- <div class="table-wrap"><table class="edit-order-items"><thead><tr><th>Item</th><th>Available</th><th>Qty</th><th>Unit Price</th><th>Amount</th><th></th></tr></thead><tbody id="editOrderItems">${o.items.map(x=>editOrderLineHtml(x)).join('')}</tbody></table></div>
- <button class="secondary" id="editAddItem" data-id="${id}">+ Add Item</button>
- <div class="edit-order-pricing">
-  <label>Suggested Price<strong id="editSuggested">$0.00</strong></label>
-  <label>Setup Fee<input id="editSetup" type="number" min="0" step=".01" value="${o.setup}"></label>
-  <label>Delivery Fee<input id="editDeliveryFee" type="number" min="0" step=".01" value="${o.deliveryFee}"></label>
-  <label>Discount<input id="editDiscount" type="number" min="0" step=".01" value="${o.discount}"></label>
-  <label class="total-row">Total Amount<strong id="editTotal">$0.00</strong></label>
-  <label>Amount Received<strong>${money(o.received)}</strong></label>
-  <label>Amount Pending<strong id="editPending">$0.00</strong></label>
- </div>
- <div class="order-edit-grid"><label class="wide">Notes<textarea id="editNotes" rows="3">${o.notes||''}</textarea></label></div>
- <div class="edit-order-footer"><button class="danger-btn" data-delete-order="${id}">Delete / Cancel Order</button><div><button class="secondary" data-cancel-edit="${id}">Cancel</button> <button class="primary" data-save-full-order="${id}">Save Order Changes</button></div></div>`;
-}
-function editOrderLineHtml(x){
- const selected=items.find(i=>i.name===x[0])||items[0];
- return `<tr><td><select class="editItemSel">${items.map(i=>`<option value="${i.id}" ${i.name===x[0]?'selected':''}>${i.name}</option>`).join('')}</select></td><td class="editAvail">${selected.qty}</td><td><input class="editQty" type="number" min="1" value="${x[1]}"></td><td><input class="editPrice" type="number" min="0" step=".01" value="${x[2]}"></td><td class="editAmount">${money(x[1]*x[2])}</td><td><button class="text-btn editRemoveItem">Remove</button></td></tr>`;
-}
-function recalcEditOrder(){
- let suggested=0; document.querySelectorAll('#editOrderItems tr').forEach(r=>{const q=+r.querySelector('.editQty').value||0,p=+r.querySelector('.editPrice').value||0;r.querySelector('.editAmount').textContent=money(q*p);suggested+=q*p});
- const setup=+document.getElementById('editSetup')?.value||0,fee=+document.getElementById('editDeliveryFee')?.value||0,discount=+document.getElementById('editDiscount')?.value||0;
- const total=suggested+setup+fee-discount; const id=document.querySelector('[data-save-full-order]')?.dataset.saveFullOrder; const received=id?Number(demoOrders[id]?.received||0):0;
- if(document.getElementById('editSuggested'))editSuggested.textContent=money(suggested);if(document.getElementById('editTotal'))editTotal.textContent=money(total);if(document.getElementById('editPending'))editPending.textContent=money(Math.max(0,total-received));
- applyMobileTableLabels(mc);
-}
-function openFullOrderEditor(id){mc.innerHTML=orderEditHtml(id);recalcEditOrder();}
-// Capture Edit Order before the older prototype edit handler can replace the modal.
-document.addEventListener('click',e=>{const b=e.target.closest('.edit-order-btn');if(!b)return;e.preventDefault();e.stopImmediatePropagation();openFullOrderEditor(b.dataset.editOrder);},true);
-document.addEventListener('change',e=>{if(e.target.matches('.editItemSel')){const r=e.target.closest('tr'),it=items.find(i=>i.id===e.target.value);r.querySelector('.editAvail').textContent=it.qty;r.querySelector('.editPrice').value=it.price;recalcEditOrder();}});
-document.addEventListener('input',e=>{if(e.target.matches('.editQty,.editPrice,#editSetup,#editDeliveryFee,#editDiscount'))recalcEditOrder();});
-document.addEventListener('click',e=>{
- if(e.target.closest('.editRemoveItem')){e.preventDefault();e.target.closest('tr').remove();recalcEditOrder();return}
- const add=e.target.closest('#editAddItem');if(add){const body=document.getElementById('editOrderItems');body.insertAdjacentHTML('beforeend',editOrderLineHtml([items[0].name,1,items[0].price]));recalcEditOrder();return}
- const cancel=e.target.closest('[data-cancel-edit]');if(cancel){openOrder(cancel.dataset.cancelEdit,false);return}
- const del=e.target.closest('[data-delete-order]');if(del){if(confirm('Cancel this order? The prototype keeps it in history but changes its status to Cancelled.')){demoOrders[del.dataset.deleteOrder].status='Cancelled';openOrder(del.dataset.deleteOrder,false);toast('Order cancelled in this demo.')}return}
- const save=e.target.closest('[data-save-full-order]');if(save){const id=save.dataset.saveFullOrder,o=demoOrders[id];o.customer=document.getElementById('editCustomer').value;o.status=document.getElementById('editStatus').value;o.event=document.getElementById('editEvent').value;o.delivery=document.getElementById('editDelivery').value;o.pickup=document.getElementById('editPickup').value;o.eventAddress=document.getElementById('editAddress').value;o.setup=+document.getElementById('editSetup').value||0;o.deliveryFee=+document.getElementById('editDeliveryFee').value||0;o.discount=+document.getElementById('editDiscount').value||0;o.notes=document.getElementById('editNotes').value;o.items=[...document.querySelectorAll('#editOrderItems tr')].map(r=>{const it=items.find(i=>i.id===r.querySelector('.editItemSel').value);return [it.name,+r.querySelector('.editQty').value||0,+r.querySelector('.editPrice').value||0]});openOrder(id,false);toast('Order items and pricing updated in this demo.');}
-});
