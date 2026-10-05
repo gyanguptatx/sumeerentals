@@ -159,3 +159,5 @@ dialog.modal-wide .order-edit-grid .wide{grid-column:1/-1}
 #orderItems select,#editItems select,#orderItems input,#editItems input{width:100%;min-width:0}
 dialog.modal-wide{width:min(1500px,99vw);max-width:1500px}
 @media(max-width:700px){.order-item-actions>*{width:100%}.availability-status{text-align:center}#orderItems,#editItems{display:block}#orderItems thead,#editItems thead{display:none}#orderItems tbody,#editItems tbody,#orderItems tr,#editItems tr,#orderItems td,#editItems td{display:block;width:100%!important}#orderItems tr,#editItems tr{padding:10px 0;border-bottom:1px solid #eadfd5}#orderItems td,#editItems td{border:0;padding:6px 0}#orderItems td::before,#editItems td::before{content:attr(data-label);display:block;font-size:11px;text-transform:uppercase;color:#74675f;font-weight:800;margin-bottom:4px}}
+
+.build-label{font-size:12px;font-weight:700;opacity:.55;margin-left:6px}
