@@ -161,3 +161,19 @@ dialog.modal-wide{width:min(1500px,99vw);max-width:1500px}
 @media(max-width:700px){.order-item-actions>*{width:100%}.availability-status{text-align:center}#orderItems,#editItems{display:block}#orderItems thead,#editItems thead{display:none}#orderItems tbody,#editItems tbody,#orderItems tr,#editItems tr,#orderItems td,#editItems td{display:block;width:100%!important}#orderItems tr,#editItems tr{padding:10px 0;border-bottom:1px solid #eadfd5}#orderItems td,#editItems td{border:0;padding:6px 0}#orderItems td::before,#editItems td::before{content:attr(data-label);display:block;font-size:11px;text-transform:uppercase;color:#74675f;font-weight:800;margin-bottom:4px}}
 
 .build-label{font-size:12px;font-weight:700;opacity:.55;margin-left:6px}
+
+
+/* v29 dashboard notes + branded print/PDF */
+.dispatch-row{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:13px 0;border-top:1px solid var(--line)}
+.dispatch-row:first-child{border-top:0}
+.dispatch-info{min-width:0;flex:1}
+.dispatch-info small{display:block;margin-top:4px;color:#666}
+.dispatch-notes{margin-top:7px;color:#514943;font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+.dispatch-notes strong{color:var(--green)}
+.print-brand{display:none}
+@media(max-width:700px){.dispatch-row{gap:10px}.dispatch-row .fulfill{flex:0 0 auto}.dispatch-notes{font-size:12px}}
+@media print{
+ .print-brand{display:block!important;position:absolute;right:20px;top:12px;width:190px;height:70px;text-align:right}
+ .print-brand img{display:inline-block!important;visibility:visible!important;max-width:190px!important;max-height:70px!important;object-fit:contain!important}
+ .order-detail-head{padding-right:215px!important;min-height:72px!important}
+}
