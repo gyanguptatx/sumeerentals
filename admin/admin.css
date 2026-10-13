@@ -177,3 +177,6 @@ dialog.modal-wide{width:min(1500px,99vw);max-width:1500px}
  .print-brand img{display:inline-block!important;visibility:visible!important;max-width:190px!important;max-height:70px!important;object-fit:contain!important}
  .order-detail-head{padding-right:215px!important;min-height:72px!important}
 }
+
+/* v30 dashboard detail enhancements */
+.dispatch-info > div{margin:.18rem 0}.dispatch-info strong{font-weight:700}

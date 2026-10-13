@@ -26,8 +26,44 @@ function setDefaults(){const now=new Date(),event=new Date(now);event.setDate(ev
 function updateRelease(){if(!$('#orderPickup').value)return;const d=new Date($('#orderPickup').value);d.setHours(d.getHours()+2);$('#releaseTime').textContent=fmt(d)}
 $('#orderPickup').addEventListener('change',updateRelease);
 
-async function loadDashboard(){const [{data:o,error},{data:noteRows,error:noteError}]=await Promise.all([db.from('vw_order_financials').select('*').neq('order_status','Cancelled').order('event_date_time'),db.from('orders').select('order_id,notes')]);if(error||noteError)return toast((error||noteError).message,true);const notesByOrder=new Map((noteRows||[]).map(r=>[String(r.order_id),r.notes||'']));state.orders=(o||[]).map(r=>({...r,notes:notesByOrder.get(String(r.order_id))||r.notes||''}));const start=new Date();start.setHours(0,0,0,0);const end=new Date(start);end.setDate(end.getDate()+8);const deliveries=state.orders.filter(x=>x.delivery_request_date_time&&new Date(x.delivery_request_date_time)>=start&&new Date(x.delivery_request_date_time)<end&&x.delivery_status!=='Delivered');const pickups=state.orders.filter(x=>x.pickup_request_date_time&&new Date(x.pickup_request_date_time)>=start&&new Date(x.pickup_request_date_time)<end&&x.pickup_status!=='Picked Up');const ids=new Set([...deliveries,...pickups].map(x=>x.order_id));const future=state.orders.filter(x=>new Date(x.event_date_time)>new Date()&&!ids.has(x.order_id)&&!(x.pickup_status==='Picked Up'&&x.final_status==='Settled'));renderDispatch('#upcomingDeliveries',deliveries,'delivery_request_date_time','delivery');renderDispatch('#upcomingPickups',pickups,'pickup_request_date_time','pickup');$('#futureEventsTable tbody').innerHTML=future.length?future.map(x=>`<tr><td><button class="text-btn order-open" data-id="${x.order_id}">${esc(x.order_number)}</button></td><td>${esc(x.customer_name)}</td><td>${fmt(x.event_date_time)}</td><td>${fmt(x.delivery_request_date_time)}</td><td>${fmt(x.pickup_request_date_time)}</td><td>${money(x.amount_pending)}</td><td>${esc(x.order_status)}</td></tr>`).join(''):`<tr><td colspan="7" class="empty-state">No additional future events.</td></tr>`;applyLabels()}
-function renderDispatch(sel,rows,dateField,type){$(sel).innerHTML=rows.length?`<div class="dispatch-list">${rows.map(x=>`<div class="dispatch-row"><div class="dispatch-info"><div><button class="text-btn order-open" data-id="${x.order_id}"><strong>${esc(x.order_number)}</strong></button> — ${esc(x.customer_name)}</div><small>${fmt(x[dateField])}</small>${String(x.notes||'').trim()?`<div class="dispatch-notes"><strong>Notes:</strong> ${esc(x.notes)}</div>`:''}</div><button class="secondary fulfill" data-id="${x.order_id}" data-type="${type}">${type==='delivery'?'Mark Delivered':'Mark Picked Up'}</button></div>`).join('')}</div>`:`<div class="empty-state">Nothing scheduled.</div>`}
+async function loadDashboard(){
+ const [{data:o,error},{data:orderRows,error:orderError},{data:customerRows,error:customerError}]=await Promise.all([
+  db.from('vw_order_financials').select('*').neq('order_status','Cancelled').order('event_date_time'),
+  db.from('orders').select('order_id,customer_id,notes,event_address,event_city'),
+  db.from('customers').select('customer_id,phone,address,city')
+ ]);
+ if(error||orderError||customerError)return toast((error||orderError||customerError).message,true);
+ const orderById=new Map((orderRows||[]).map(r=>[String(r.order_id),r]));
+ const customerById=new Map((customerRows||[]).map(r=>[String(r.customer_id),r]));
+ state.orders=(o||[]).map(r=>{
+  const raw=orderById.get(String(r.order_id))||{}, customer=customerById.get(String(r.customer_id))||{};
+  return {...r,
+   notes:raw.notes||r.notes||'',
+   event_address:raw.event_address||r.event_address||'',
+   event_city:raw.event_city||r.event_city||'',
+   phone:customer.phone||r.phone||'',
+   customer_address:customer.address||'',
+   customer_city:customer.city||''
+  };
+ });
+ const start=new Date();start.setHours(0,0,0,0);const end=new Date(start);end.setDate(end.getDate()+8);
+ const deliveries=state.orders.filter(x=>x.delivery_request_date_time&&new Date(x.delivery_request_date_time)>=start&&new Date(x.delivery_request_date_time)<end&&x.delivery_status!=='Delivered').sort((a,b)=>new Date(a.delivery_request_date_time)-new Date(b.delivery_request_date_time));
+ const pickups=state.orders.filter(x=>x.pickup_request_date_time&&new Date(x.pickup_request_date_time)>=start&&new Date(x.pickup_request_date_time)<end&&x.pickup_status!=='Picked Up').sort((a,b)=>new Date(a.pickup_request_date_time)-new Date(b.pickup_request_date_time));
+ const ids=new Set([...deliveries,...pickups].map(x=>x.order_id));
+ const future=state.orders.filter(x=>new Date(x.event_date_time)>new Date()&&!ids.has(x.order_id)&&!(x.pickup_status==='Picked Up'&&x.final_status==='Settled')).sort((a,b)=>new Date(a.event_date_time)-new Date(b.event_date_time));
+ renderDispatch('#upcomingDeliveries',deliveries,'delivery_request_date_time','delivery');
+ renderDispatch('#upcomingPickups',pickups,'pickup_request_date_time','pickup');
+ $('#futureEventsTable tbody').innerHTML=future.length?future.map(x=>`<tr><td><button class="text-btn order-open" data-id="${x.order_id}">${esc(x.order_number)}</button></td><td>${esc(x.customer_name)}${x.phone?` - ${esc(x.phone)}`:''}</td><td>${esc(dashboardAddress(x))}</td><td>${fmt(x.event_date_time)}</td><td>${fmt(x.delivery_request_date_time)}</td><td>${fmt(x.pickup_request_date_time)}</td><td>${money(x.amount_pending)}</td><td>${esc(x.order_status)}</td></tr>`).join(''):`<tr><td colspan="8" class="empty-state">No additional future events.</td></tr>`;
+ applyLabels()
+}
+function dashboardAddress(x){
+ const event=[x.event_address,x.event_city].filter(v=>String(v||'').trim()).join(', ');
+ if(event)return event;
+ return [x.customer_address,x.customer_city].filter(v=>String(v||'').trim()).join(', ')||'—'
+}
+function renderDispatch(sel,rows,dateField,type){
+ $(sel).innerHTML=rows.length?`<div class="dispatch-list">${rows.map(x=>`<div class="dispatch-row"><div class="dispatch-info"><div><button class="text-btn order-open" data-id="${x.order_id}"><strong>${esc(x.order_number)}</strong></button></div><div><strong>Customer:</strong> ${esc(x.customer_name)}</div><div><strong>Phone:</strong> ${esc(x.phone||'—')}</div><div><strong>${type==='delivery'?'Delivery Date / Time':'Pickup Date / Time'}:</strong> ${fmt(x[dateField])}</div>${type==='delivery'?`<div><strong>Event Date:</strong> ${fmt(x.event_date_time)}</div>`:''}<div><strong>Address:</strong> ${esc(dashboardAddress(x))}</div>${String(x.notes||'').trim()?`<div class="dispatch-notes"><strong>Notes:</strong> ${esc(x.notes)}</div>`:''}</div><button class="secondary fulfill" data-id="${x.order_id}" data-type="${type}">${type==='delivery'?'Mark Delivered':'Mark Picked Up'}</button></div>`).join('')}</div>`:`<div class="empty-state">Nothing scheduled.</div>`
+}
 
 async function loadCustomers(){const [{data,error},{data:orders,error:oe}]=await Promise.all([db.from('vw_customer_lifetime_value').select('*').order('customer_name'),db.from('vw_order_financials').select('customer_id,amount_pending,order_status')]);if(error||oe)return toast((error||oe).message,true);const due=new Map();(orders||[]).filter(o=>o.order_status!=='Cancelled').forEach(o=>due.set(String(o.customer_id),(due.get(String(o.customer_id))||0)+Number(o.amount_pending||0)));state.customers=(data||[]).map(c=>({...c,amount_due:due.get(String(c.customer_id))||0}));renderCustomers();fillCustomerSelect()}
 function renderCustomers(){const q=$('#customerSearch').value.toLowerCase();const rows=state.customers.filter(c=>`${c.customer_name} ${c.phone} ${c.email} ${c.city}`.toLowerCase().includes(q));$('#customerTable tbody').innerHTML=rows.length?rows.map(c=>`<tr><td>${esc(c.customer_name)}</td><td>${esc(c.phone)}</td><td><strong>${money(c.lifetime_value)}</strong></td><td><strong class="${Number(c.amount_due)>0?'danger':''}">${money(c.amount_due)}</strong></td><td class="customer-actions"><button class="text-btn customer-edit" data-id="${c.customer_id}">View/Edit Customer</button><button class="text-btn customer-new-order" data-id="${c.customer_id}">New Order</button><button class="text-btn customer-orders" data-id="${c.customer_id}">View/Edit Orders</button><button class="text-btn customer-payments" data-id="${c.customer_id}">Add/Edit Payments</button></td></tr>`).join(''):`<tr><td colspan="5" class="empty-state">No customers found.</td></tr>`;applyLabels()}
