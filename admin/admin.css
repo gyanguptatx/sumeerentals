@@ -180,3 +180,13 @@ dialog.modal-wide{width:min(1500px,99vw);max-width:1500px}
 
 /* v30 dashboard detail enhancements */
 .dispatch-info > div{margin:.18rem 0}.dispatch-info strong{font-weight:700}
+
+/* v31: actionable dashboard contact and navigation links */
+.dashboard-action-link{color:var(--green);text-decoration:underline;text-underline-offset:2px;font-weight:700}
+.dashboard-map-alternative{font-size:11px;white-space:nowrap;margin-left:7px;color:#795b41;text-decoration:underline}
+@media(max-width:900px){
+ .admin-sidebar{align-items:center;min-height:0;height:auto;max-height:56px;box-sizing:border-box;overflow-x:auto;overflow-y:hidden}
+ .admin-sidebar button,.admin-sidebar a{flex:0 0 auto;align-self:center;box-sizing:border-box;min-height:36px;height:36px;line-height:18px;display:inline-flex;align-items:center;justify-content:center;border:0!important;margin:0!important;box-shadow:none!important}
+ .admin-sidebar button.active{background:var(--orange);border:0!important}
+}
+@media(max-width:600px){.admin-sidebar{max-height:50px}.admin-sidebar button,.admin-sidebar a{height:34px;min-height:34px;line-height:16px}}

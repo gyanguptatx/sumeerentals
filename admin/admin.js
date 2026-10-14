@@ -53,7 +53,7 @@ async function loadDashboard(){
  const future=state.orders.filter(x=>new Date(x.event_date_time)>new Date()&&!ids.has(x.order_id)&&!(x.pickup_status==='Picked Up'&&x.final_status==='Settled')).sort((a,b)=>new Date(a.event_date_time)-new Date(b.event_date_time));
  renderDispatch('#upcomingDeliveries',deliveries,'delivery_request_date_time','delivery');
  renderDispatch('#upcomingPickups',pickups,'pickup_request_date_time','pickup');
- $('#futureEventsTable tbody').innerHTML=future.length?future.map(x=>`<tr><td><button class="text-btn order-open" data-id="${x.order_id}">${esc(x.order_number)}</button></td><td>${esc(x.customer_name)}${x.phone?` - ${esc(x.phone)}`:''}</td><td>${esc(dashboardAddress(x))}</td><td>${fmt(x.event_date_time)}</td><td>${fmt(x.delivery_request_date_time)}</td><td>${fmt(x.pickup_request_date_time)}</td><td>${money(x.amount_pending)}</td><td>${esc(x.order_status)}</td></tr>`).join(''):`<tr><td colspan="8" class="empty-state">No additional future events.</td></tr>`;
+ $('#futureEventsTable tbody').innerHTML=future.length?future.map(x=>`<tr><td><button class="text-btn order-open" data-id="${x.order_id}">${esc(x.order_number)}</button></td><td>${esc(x.customer_name)}${x.phone?` - ${dashboardPhoneLink(x.phone)}`:''}</td><td>${dashboardMapLink(x)}</td><td>${fmt(x.event_date_time)}</td><td>${fmt(x.delivery_request_date_time)}</td><td>${fmt(x.pickup_request_date_time)}</td><td>${money(x.amount_pending)}</td><td>${esc(x.order_status)}</td></tr>`).join(''):`<tr><td colspan="8" class="empty-state">No additional future events.</td></tr>`;
  applyLabels()
 }
 function dashboardAddress(x){
@@ -61,8 +61,19 @@ function dashboardAddress(x){
  if(event)return event;
  return [x.customer_address,x.customer_city].filter(v=>String(v||'').trim()).join(', ')||'—'
 }
+function dashboardMapLink(x){
+ const address=dashboardAddress(x);
+ if(address==='—')return '—';
+ const encoded=encodeURIComponent(address);
+ return `<a class="dashboard-action-link" href="https://www.google.com/maps/search/?api=1&query=${encoded}" target="_blank" rel="noopener noreferrer" title="Open address in Google Maps">${esc(address)}</a> <a class="dashboard-map-alternative" href="https://maps.apple.com/?q=${encoded}" target="_blank" rel="noopener noreferrer" aria-label="Open address in Apple Maps">Apple Maps</a>`;
+}
+function dashboardPhoneLink(phone){
+ const shown=String(phone||'').trim();
+ const digits=shown.replace(/[^\d+]/g,'');
+ return digits?`<a class="dashboard-action-link" href="tel:${esc(digits)}">${esc(shown)}</a>`:'—';
+}
 function renderDispatch(sel,rows,dateField,type){
- $(sel).innerHTML=rows.length?`<div class="dispatch-list">${rows.map(x=>`<div class="dispatch-row"><div class="dispatch-info"><div><button class="text-btn order-open" data-id="${x.order_id}"><strong>${esc(x.order_number)}</strong></button></div><div><strong>Customer:</strong> ${esc(x.customer_name)}</div><div><strong>Phone:</strong> ${esc(x.phone||'—')}</div><div><strong>${type==='delivery'?'Delivery Date / Time':'Pickup Date / Time'}:</strong> ${fmt(x[dateField])}</div>${type==='delivery'?`<div><strong>Event Date:</strong> ${fmt(x.event_date_time)}</div>`:''}<div><strong>Address:</strong> ${esc(dashboardAddress(x))}</div>${String(x.notes||'').trim()?`<div class="dispatch-notes"><strong>Notes:</strong> ${esc(x.notes)}</div>`:''}</div><button class="secondary fulfill" data-id="${x.order_id}" data-type="${type}">${type==='delivery'?'Mark Delivered':'Mark Picked Up'}</button></div>`).join('')}</div>`:`<div class="empty-state">Nothing scheduled.</div>`
+ $(sel).innerHTML=rows.length?`<div class="dispatch-list">${rows.map(x=>`<div class="dispatch-row"><div class="dispatch-info"><div><button class="text-btn order-open" data-id="${x.order_id}"><strong>${esc(x.order_number)}</strong></button></div><div><strong>Customer:</strong> ${esc(x.customer_name)}</div><div><strong>Phone:</strong> ${dashboardPhoneLink(x.phone)}</div><div><strong>${type==='delivery'?'Delivery Date / Time':'Pickup Date / Time'}:</strong> ${fmt(x[dateField])}</div>${type==='delivery'?`<div><strong>Event Date:</strong> ${fmt(x.event_date_time)}</div>`:''}<div><strong>Address:</strong> ${dashboardMapLink(x)}</div>${String(x.notes||'').trim()?`<div class="dispatch-notes"><strong>Notes:</strong> ${esc(x.notes)}</div>`:''}</div><button class="secondary fulfill" data-id="${x.order_id}" data-type="${type}">${type==='delivery'?'Mark Delivered':'Mark Picked Up'}</button></div>`).join('')}</div>`:`<div class="empty-state">Nothing scheduled.</div>`
 }
 
 async function loadCustomers(){const [{data,error},{data:orders,error:oe}]=await Promise.all([db.from('vw_customer_lifetime_value').select('*').order('customer_name'),db.from('vw_order_financials').select('customer_id,amount_pending,order_status')]);if(error||oe)return toast((error||oe).message,true);const due=new Map();(orders||[]).filter(o=>o.order_status!=='Cancelled').forEach(o=>due.set(String(o.customer_id),(due.get(String(o.customer_id))||0)+Number(o.amount_pending||0)));state.customers=(data||[]).map(c=>({...c,amount_due:due.get(String(c.customer_id))||0}));renderCustomers();fillCustomerSelect()}
