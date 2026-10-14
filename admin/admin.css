@@ -190,3 +190,6 @@ dialog.modal-wide{width:min(1500px,99vw);max-width:1500px}
  .admin-sidebar button.active{background:var(--orange);border:0!important}
 }
 @media(max-width:600px){.admin-sidebar{max-height:50px}.admin-sidebar button,.admin-sidebar a{height:34px;min-height:34px;line-height:16px}}
+
+/* v33: align accounting income amounts */
+#incomeTable th.income-amount,#incomeTable td.income-amount{text-align:right;white-space:nowrap;}
