@@ -193,3 +193,8 @@ dialog.modal-wide{width:min(1500px,99vw);max-width:1500px}
 
 /* v33: align accounting income amounts */
 #incomeTable th.income-amount,#incomeTable td.income-amount{text-align:right;white-space:nowrap;}
+
+/* v35 dashboard rental-item list */
+.dashboard-items{margin-top:8px;}
+.dashboard-item-lines{margin:4px 0 0 12px;line-height:1.55;white-space:normal;}
+.dashboard-item-lines > div{display:block;}
