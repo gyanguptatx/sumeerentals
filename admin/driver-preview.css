@@ -1,0 +1,12 @@
+*{box-sizing:border-box}body{margin:0;font:15px system-ui,Arial,sans-serif;color:#263442;background:#f6f8fb}
+header{background:#17375b;color:white;padding:14px 24px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+header button{margin-left:auto}main{max-width:1120px;margin:22px auto;padding:0 16px}
+.panel,.task{background:white;border:1px solid #dce3eb;border-radius:8px;padding:16px;margin:10px 0}
+#loginBox{max-width:440px;margin:60px auto}label{display:block;font-weight:700;margin:14px 0}
+input{display:block;width:100%;padding:10px;margin-top:5px;border:1px solid #aebdcb;border-radius:5px}
+button{background:#176a9c;color:white;border:0;border-radius:5px;padding:10px 15px;cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}.columns{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.task{font-size:14px}.task h3{margin:0 0 8px}.task p{margin:5px 0;overflow-wrap:anywhere}
+.task b{font-weight:700}.task ul{margin:5px 0 8px;padding-left:22px}
+.task a{color:#005c99}#loginError{color:#a62121}#notice{min-height:1.2em}
+@media(max-width:780px){.columns{grid-template-columns:1fr}}

@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SuMee Driver / Helper Preview</title><link rel="stylesheet" href="driver-preview.css"></head>
+<body><header><strong>SuMee Party Rentals</strong><span>Driver / Helper — v36 Preview</span>
+<button id="logout" hidden>Sign out</button></header>
+<main><section id="loginBox" class="panel"><h1>Team sign in</h1>
+<form id="login"><label>Email<input id="email" type="email" autocomplete="username" required></label>
+<label>Password<input id="password" type="password" autocomplete="current-password" required></label>
+<button type="submit">Sign in</button></form><p id="loginError" role="alert"></p></section>
+<section id="app" hidden><p id="userLabel"></p><p id="notice" role="status"></p>
+<div class="columns"><section><h2>Upcoming Deliveries</h2><div id="deliveries"></div></section>
+<section><h2>Upcoming Pickups</h2><div id="pickups"></div></section></div></section></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js?v=1"></script><script src="driver-preview.js?v=1"></script></body></html>
