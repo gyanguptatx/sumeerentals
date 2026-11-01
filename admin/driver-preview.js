@@ -33,9 +33,7 @@ function taskCard(task){
  };
  card.append(btn);return card;
 }
-async function loadTasks(){
- const {data,error}=await db.rpc('sumee_driver_tasks');
- if(error){$('notice').textContent=`Unable to load tasks: ${error.message}`;return}
+function renderTasks(data){
  for(const [type,id,dateKey] of [['delivery','deliveries','delivery_request_date_time'],['pickup','pickups','pickup_request_date_time']]){
   const holder=$(id);holder.replaceChildren();
   const tasks=(data||[]).filter(x=>x.task_type===type).sort((a,b)=>new Date(a[dateKey]||0)-new Date(b[dateKey]||0));
@@ -43,18 +41,34 @@ async function loadTasks(){
   for(const task of tasks)holder.append(taskCard(task));
  }
 }
-async function boot(){
- const {data:{user}}=await db.auth.getUser();
- if(!user){$('loginBox').hidden=false;$('app').hidden=true;$('logout').hidden=true;return}
- const {data:profile,error}=await db.from('admin_users').select('role,active,display_name').eq('user_id',user.id).maybeSingle();
- if(error||!profile?.active||!['admin','driver_helper'].includes(profile.role)){
-  await db.auth.signOut();$('loginError').textContent='Account not authorized for team access.';
-  $('loginBox').hidden=false;$('app').hidden=true;$('logout').hidden=true;return
- }
- $('loginBox').hidden=true;$('app').hidden=false;$('logout').hidden=false;
- $('userLabel').textContent=`Signed in: ${profile.display_name||user.email}`;
- await loadTasks();
+async function loadTasks(){
+ const {data,error}=await db.rpc('sumee_driver_tasks');
+ if(error){$('notice').textContent=`Unable to load tasks: ${error.message}`;return}
+ renderTasks(data||[]);
 }
+async function boot(){
+ const {data:{user},error:authError}=await db.auth.getUser();
+ if(authError || !user){
+  $('loginBox').hidden=false;$('app').hidden=true;$('logout').hidden=true;
+  if(authError)$('loginError').textContent=authError.message;
+  return;
+ }
+ // Do not read admin_users: its RLS policy intentionally permits Admin only.
+ // The SECURITY DEFINER RPC authorizes both active Admin and Driver / Helper roles.
+ const {data:tasks,error}=await db.rpc('sumee_driver_tasks');
+ if(error){
+  $('loginBox').hidden=false;$('app').hidden=true;$('logout').hidden=false;
+  $('loginError').textContent=error.code==='42501'
+    ? 'This account is not authorized for Driver / Helper access.'
+    : `Unable to load tasks (${error.code||'unknown'}): ${error.message}`;
+  return;
+ }
+ $('loginError').textContent='';
+ $('loginBox').hidden=true;$('app').hidden=false;$('logout').hidden=false;
+ $('userLabel').textContent=`Signed in: ${user.email}`;
+ renderTasks(tasks||[]);
+}
+
 $('login').onsubmit=async e=>{
  e.preventDefault();$('loginError').textContent='Signing in…';
  const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
