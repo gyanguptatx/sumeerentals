@@ -198,3 +198,10 @@ dialog.modal-wide{width:min(1500px,99vw);max-width:1500px}
 .dashboard-items{margin-top:8px;}
 .dashboard-item-lines{margin:4px 0 0 12px;line-height:1.55;white-space:normal;}
 .dashboard-item-lines > div{display:block;}
+
+.v36-fulfill-btn{align-self:center;white-space:nowrap}
+.v36-fulfill-btn:disabled{opacity:.5;cursor:wait}
+
+/* Distinct but understated admin correction controls */
+.v36-undo{border:1px solid #a86b37!important;background:transparent!important;color:#8b4b23!important;white-space:nowrap;}
+.v36-undo:disabled{opacity:.55;cursor:wait;}

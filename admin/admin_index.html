@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>SuMee Admin</title>
   <link rel="stylesheet" href="../css/styles.css">
-  <link rel="stylesheet" href="admin.css?v=29">
+  <link rel="stylesheet" href="admin.css?v=36">
 </head>
 <body class="admin-body">
   <div id="loginScreen" class="login-screen">
@@ -44,9 +44,10 @@
         <section class="page active" id="dashboard">
           <div class="page-head"><div><h1>Dashboard</h1><p>SuMee rental operations at a glance.</p></div><button class="primary" data-go="neworder">+ New Order</button></div>
           <div class="dashboard-sections">
-            <div class="dispatch-card"><h2>Upcoming Deliveries <small>Today + Next 7 Days</small></h2><div id="upcomingDeliveries"></div></div>
-            <div class="dispatch-card"><h2>Upcoming Pickups <small>Today + Next 7 Days</small></h2><div id="upcomingPickups"></div></div>
+            <div class="dispatch-card"><h2>Upcoming Deliveries <small>Overdue + Next 10 Days</small></h2><div id="upcomingDeliveries"></div></div>
+            <div class="dispatch-card"><h2>Upcoming Pickups <small>Delivered / Awaiting Pickup</small></h2><div id="upcomingPickups"></div></div>
             <div class="panel future-events-panel"><h2>Upcoming Events <small>Future events not shown above</small></h2><div class="table-wrap"><table id="futureEventsTable"><thead><tr><th>Order</th><th>Customer</th><th>Address</th><th>Event</th><th>Delivery</th><th>Pickup</th><th>Balance</th><th>Status</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="panel future-events-panel"><h2>Fulfillment History <small>Latest 100 delivered or picked-up orders</small></h2><div class="table-wrap"><table id="fulfillmentHistory"><thead><tr><th>Order</th><th>Customer</th><th>Delivery</th><th>Pickup</th><th>Delivery Status</th><th>Pickup Status</th><th>Admin Correction</th></tr></thead><tbody></tbody></table></div></div>
           </div>
         </section>
 
@@ -118,6 +119,6 @@
   <dialog id="modal"><button class="modal-close" aria-label="Close">×</button><div id="modalContent"></div></dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=1"></script>
-  <script src="admin.js?v=29"></script>
+  <script src="admin.js?v=36"></script>
 </body>
 </html>

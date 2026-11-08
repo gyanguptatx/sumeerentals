@@ -77,11 +77,16 @@ async function loadDashboard(){
   });
  }
  state.orders.forEach(x=>{x.dashboardItems=dashboardItems.get(String(x.order_id))||[]});
- const start=new Date();start.setHours(0,0,0,0);const end=new Date(start);end.setDate(end.getDate()+8);
- const deliveries=state.orders.filter(x=>x.delivery_request_date_time&&new Date(x.delivery_request_date_time)>=start&&new Date(x.delivery_request_date_time)<end&&x.delivery_status!=='Delivered').sort((a,b)=>new Date(a.delivery_request_date_time)-new Date(b.delivery_request_date_time));
- const pickups=state.orders.filter(x=>x.pickup_request_date_time&&new Date(x.pickup_request_date_time)>=start&&new Date(x.pickup_request_date_time)<end&&x.pickup_status!=='Picked Up').sort((a,b)=>new Date(a.pickup_request_date_time)-new Date(b.pickup_request_date_time));
- const ids=new Set([...deliveries,...pickups].map(x=>x.order_id));
- const future=state.orders.filter(x=>new Date(x.event_date_time)>new Date()&&!ids.has(x.order_id)&&!(x.pickup_status==='Picked Up'&&x.final_status==='Settled')).sort((a,b)=>new Date(a.event_date_time)-new Date(b.event_date_time));
+ const start=new Date();start.setHours(0,0,0,0);const end=new Date(start);end.setDate(end.getDate()+11);
+ const valid=d=>d&&Number.isFinite(new Date(d).getTime());
+ const delivered=x=>x.delivery_status==='Delivered';
+ const picked=x=>x.pickup_status==='Picked Up';
+ const deliveries=state.orders.filter(x=>valid(x.delivery_request_date_time)&&new Date(x.delivery_request_date_time)<end&&!delivered(x)&&!picked(x)).sort((a,b)=>new Date(a.delivery_request_date_time)-new Date(b.delivery_request_date_time));
+ const pickups=state.orders.filter(x=>valid(x.pickup_request_date_time)&&delivered(x)&&!picked(x)).sort((a,b)=>new Date(a.pickup_request_date_time)-new Date(b.pickup_request_date_time));
+ const ids=new Set([...deliveries,...pickups].map(x=>String(x.order_id)));
+ const future=state.orders.filter(x=>valid(x.event_date_time)&&new Date(x.event_date_time)>new Date()&&!ids.has(String(x.order_id))&&!picked(x)).sort((a,b)=>new Date(a.event_date_time)-new Date(b.event_date_time));
+ const history=state.orders.filter(x=>delivered(x)||picked(x)).sort((a,b)=>new Date(b.actual_pickup_date_time||b.actual_delivery_date_time||b.pickup_request_date_time||0)-new Date(a.actual_pickup_date_time||a.actual_delivery_date_time||a.pickup_request_date_time||0)).slice(0,100);
+ $('#fulfillmentHistory tbody').innerHTML=history.length?history.map(x=>`<tr><td><button class="text-btn order-open" data-id="${esc(x.order_id)}">${esc(x.order_number)}</button></td><td>${esc(x.customer_name)}</td><td>${fmtDashboard(x.actual_delivery_date_time||x.delivery_request_date_time,true)}</td><td>${fmtDashboard(x.actual_pickup_date_time||x.pickup_request_date_time,true)}</td><td>${esc(x.delivery_status||'—')}</td><td>${esc(x.pickup_status||'—')}</td><td>${x.pickup_status==='Picked Up'?`<button type="button" class="secondary v36-undo" data-id="${esc(x.order_id)}" data-action="undo_pickup">Undo Pickup</button>`:x.delivery_status==='Delivered'&&x.pickup_status==='Pending'?`<button type="button" class="secondary v36-undo" data-id="${esc(x.order_id)}" data-action="undo_delivery">Undo Delivery</button>`:'—'}</td></tr>`).join(''):'<tr><td colspan="7" class="empty-state">No fulfillment activity.</td></tr>';
  renderDispatch('#upcomingDeliveries',deliveries,'delivery_request_date_time','delivery');
  renderDispatch('#upcomingPickups',pickups,'pickup_request_date_time','pickup');
  $('#futureEventsTable tbody').innerHTML=future.length?future.map(x=>`<tr><td><button class="text-btn order-open" data-id="${x.order_id}">${esc(x.order_number)}</button></td><td>${esc(x.customer_name)}${x.phone?` - ${dashboardPhoneLink(x.phone)}`:''}</td><td>${dashboardMapLink(x)}${dashboardItemsHTML(x)}</td><td>${fmtDashboard(x.event_date_time,true)}</td><td>${fmtDashboard(x.delivery_request_date_time,true)}</td><td>${fmtDashboard(x.pickup_request_date_time,true)}</td><td>${money(x.amount_pending)}</td><td>${esc(x.order_status)}</td></tr>`).join(''):`<tr><td colspan="8" class="empty-state">No additional future events.</td></tr>`;
@@ -108,7 +113,7 @@ function dashboardItemsHTML(order){
  return `<div class="dashboard-items"><strong>Items:</strong>${items.length?`<div class="dashboard-item-lines">${items.map(item=>`<div>${esc(item.name)} × ${item.qty}</div>`).join('')}</div>`:'<div class="dashboard-item-lines">No items listed</div>'}</div>`;
 }
 function renderDispatch(sel,rows,dateField,type){
- $(sel).innerHTML=rows.length?`<div class="dispatch-list">${rows.map(x=>`<div class="dispatch-row"><div class="dispatch-info"><div><button class="text-btn order-open" data-id="${x.order_id}"><strong>${esc(x.order_number)}</strong></button></div><div><strong>Customer:</strong> ${esc(x.customer_name)}</div><div><strong>Phone:</strong> ${dashboardPhoneLink(x.phone)}</div><div><strong>${type==='delivery'?'Delivery Date / Time':'Pickup Date / Time'}:</strong> ${fmtDashboard(x[dateField])}</div>${type==='delivery'?`<div><strong>Event Date:</strong> ${fmtDashboard(x.event_date_time)}</div>`:''}<div><strong>Address:</strong> ${dashboardMapLink(x)}</div>${dashboardItemsHTML(x)}${String(x.notes||'').trim()?`<div class="dispatch-notes"><strong>Notes:</strong> ${esc(x.notes)}</div>`:''}</div><button class="secondary fulfill" data-id="${x.order_id}" data-type="${type}">${type==='delivery'?'Mark Delivered':'Mark Picked Up'}</button></div>`).join('')}</div>`:`<div class="empty-state">Nothing scheduled.</div>`
+ $(sel).innerHTML=rows.length?`<div class="dispatch-list">${rows.map(x=>`<div class="dispatch-row"><div class="dispatch-info"><div><button class="text-btn order-open" data-id="${x.order_id}"><strong>${esc(x.order_number)}</strong></button></div><div><strong>Customer:</strong> ${esc(x.customer_name)}</div><div><strong>Phone:</strong> ${dashboardPhoneLink(x.phone)}</div><div><strong>${type==='delivery'?'Delivery Date / Time':'Pickup Date / Time'}:</strong> ${fmtDashboard(x[dateField])}</div>${type==='delivery'?`<div><strong>Event Date:</strong> ${fmtDashboard(x.event_date_time)}</div>`:''}<div><strong>Address:</strong> ${dashboardMapLink(x)}</div>${dashboardItemsHTML(x)}${String(x.notes||'').trim()?`<div class="dispatch-notes"><strong>Notes:</strong> ${esc(x.notes)}</div>`:''}</div><button class="fulfill primary v36-fulfill-btn" data-id="${esc(x.order_id)}" data-type="${type}" type="button">${type==='delivery'?'Mark Delivered':'Mark Picked Up'}</button></div>`).join('')}</div>`:`<div class="empty-state">Nothing scheduled.</div>`
 }
 
 async function loadCustomers(){const [{data,error},{data:orders,error:oe}]=await Promise.all([db.from('vw_customer_lifetime_value').select('*').order('customer_name'),db.from('vw_order_financials').select('customer_id,amount_pending,order_status')]);if(error||oe)return toast((error||oe).message,true);const due=new Map();(orders||[]).filter(o=>o.order_status!=='Cancelled').forEach(o=>due.set(String(o.customer_id),(due.get(String(o.customer_id))||0)+Number(o.amount_pending||0)));state.customers=(data||[]).map(c=>({...c,amount_due:due.get(String(c.customer_id))||0}));renderCustomers();fillCustomerSelect()}
@@ -223,7 +228,46 @@ document.addEventListener('click',async e=>{
  const ped=e.target.closest('.pay-edit');if(ped){const {data,error}=await db.from('payments').select('*').eq('payment_id',ped.dataset.id).single();if(error)return toast(error.message,true);return paymentForm(+ped.dataset.order,data)}
  const xe=e.target.closest('.expense-edit');if(xe){const {data,error}=await db.from('expenses').select('*').eq('expense_id',xe.dataset.id).single();if(error)return toast(error.message,true);return expenseEditor(data)}
  const xd=e.target.closest('.expense-delete');if(xd){if(!confirm('Delete this expense?'))return;const {error}=await db.from('expenses').delete().eq('expense_id',xd.dataset.id);if(error)return toast(error.message,true);toast('Expense deleted.');return loadAccounting()}
- const f=e.target.closest('.fulfill');if(f){if(!confirm(f.dataset.type==='delivery'?'Mark this order as delivered?':'Mark this order as picked up? This will lock the order from further editing.'))return;const now=new Date().toISOString(),update=f.dataset.type==='delivery'?{delivery_status:'Delivered',actual_delivery_date_time:now}:{pickup_status:'Picked Up',actual_pickup_date_time:now};const {error}=await db.from('orders').update(update).eq('order_id',f.dataset.id);if(error)return toast(error.message,true);toast(f.dataset.type==='delivery'?'Order marked delivered.':'Order marked picked up.');return loadDashboard()}
+ const undo=e.target.closest('.v36-undo');
+ if(undo){
+  if(undo.disabled)return;
+  const order=state.orders.find(o=>String(o.order_id)===String(undo.dataset.id));
+  if(!order)return toast('Order not found. Refresh and retry.',true);
+  const pickup=undo.dataset.action==='undo_pickup';
+  const actionLabel=pickup?'Undo Pickup':'Undo Delivery';
+  if(!confirm(`ADMIN CORRECTION — LIVE DATABASE\n\n${actionLabel} for ${order.order_number} — ${order.customer_name}?\n\n${pickup?'This will restore the inventory reservation, if sufficient inventory remains.':'This clears the actual delivery timestamp.'}\n\nThis action will be audited.`))return;
+  undo.disabled=true;undo.textContent='Checking…';
+  try{
+   const {error}=await db.rpc('sumee_admin_undo_fulfillment',{p_order_id:Number(order.order_id),p_action:undo.dataset.action});
+   if(error)throw error;
+   toast(`${actionLabel} completed for ${order.order_number}.`);
+   state.newAvailabilityValid=false;state.editAvailabilityValid=false;
+   await loadDashboard();
+  }catch(error){toast(error.message||'Unable to undo fulfillment.',true);undo.disabled=false;undo.textContent=actionLabel;}
+  return;
+ }
+ const f=e.target.closest('.fulfill');
+ if(f){
+  if(f.disabled)return;
+  const order=state.orders.find(o=>String(o.order_id)===String(f.dataset.id));
+  if(!order)return toast('Order not found. Refresh and retry.',true);
+  const isDelivery=f.dataset.type==='delivery';
+  if(order.order_status!=='Confirmed')return toast('Only confirmed orders can be fulfilled.',true);
+  if(isDelivery && (order.delivery_status==='Delivered'||order.pickup_status==='Picked Up'))return toast('This delivery is already complete.',true);
+  if(!isDelivery && (order.delivery_status!=='Delivered'||order.pickup_status==='Picked Up'))return toast('Mark Delivered before Mark Picked Up.',true);
+  const verb=isDelivery?'Delivered':'Picked Up';
+  if(!confirm(`LIVE DATABASE CHANGE: Mark order ${order.order_number} for ${order.customer_name} as ${verb}? ${isDelivery?'':'This releases its inventory reservation immediately.'}`))return;
+  f.disabled=true;f.textContent='Saving…';
+  try{
+   const {error}=await db.rpc('sumee_mark_fulfillment',{p_order_id:Number(order.order_id),p_action:isDelivery?'delivered':'picked_up'});
+   if(error)throw error;
+   toast(`Order ${order.order_number} marked ${verb}.`);
+   state.newAvailabilityValid=false;state.editAvailabilityValid=false;
+   await loadDashboard();
+  }catch(error){toast(error.message||'Unable to update fulfillment.',true);f.disabled=false;f.textContent=`Mark ${verb}`;}
+  return;
+ }
+
 });
 function applyLabels(root=document){root.querySelectorAll('table').forEach(t=>{const h=$$('thead th',t);t.querySelectorAll('tbody tr').forEach(r=>[...r.children].forEach((c,i)=>{if(c.tagName==='TD')c.dataset.label=h[i]?.textContent.trim()||''}))})}
 boot();
