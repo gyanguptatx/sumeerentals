@@ -201,5 +201,5 @@ dialog.modal-wide{width:min(1500px,99vw);max-width:1500px}
 
 .preview-notice{background:#fff3cd;color:#604600;padding:12px 16px;border:1px solid #e4c86a;border-radius:8px;margin-bottom:16px;font-weight:600}.preview-readonly{font-size:12px;color:#666;align-self:center}
 
-.v36-fulfill-btn{background:#116149;color:#fff;border:0;border-radius:8px;padding:10px 15px;cursor:pointer;font-weight:700;align-self:center;white-space:nowrap}
+.v36-fulfill-btn{align-self:center;white-space:nowrap}
 .v36-fulfill-btn:disabled{opacity:.5;cursor:wait}
