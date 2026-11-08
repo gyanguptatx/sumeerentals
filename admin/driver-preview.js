@@ -29,14 +29,14 @@ function taskCard(task){
    btn.disabled=true;$('notice').textContent='Saving fulfillment update…';
    const {error}=await db.rpc('sumee_mark_fulfillment',{p_order_id:task.order_id,p_action:action});
    if(error){$('notice').textContent=error.message;btn.disabled=blocked;return}
-   $('notice').textContent='Updated successfully.';await loadTasks();
+   $('notice').textContent='Updated successfully. Inventory availability will reflect the completed pickup on the next availability check.';await loadTasks();
  };
  card.append(btn);return card;
 }
 function renderTasks(data){
  for(const [type,id,dateKey] of [['delivery','deliveries','delivery_request_date_time'],['pickup','pickups','pickup_request_date_time']]){
   const holder=$(id);holder.replaceChildren();
-  const tasks=(data||[]).filter(x=>x.task_type===type).sort((a,b)=>new Date(a[dateKey]||0)-new Date(b[dateKey]||0));
+  const tasks=(data||[]).filter(x=>x.task_type===type && (type==='delivery' ? x.delivery_status!=='Delivered' && x.pickup_status!=='Picked Up' : x.delivery_status==='Delivered' && x.pickup_status!=='Picked Up')).sort((a,b)=>new Date(a[dateKey]||0)-new Date(b[dateKey]||0));
   if(!tasks.length)holder.append(node('p','No upcoming tasks.'));
   for(const task of tasks)holder.append(taskCard(task));
  }
