@@ -205,3 +205,19 @@ dialog.modal-wide{width:min(1500px,99vw);max-width:1500px}
 /* Distinct but understated admin correction controls */
 .v36-undo{border:1px solid #a86b37!important;background:transparent!important;color:#8b4b23!important;white-space:nowrap;}
 .v36-undo:disabled{opacity:.55;cursor:wait;}
+
+/* v36.1: Visually distinguish pickup completion from delivery on all devices, including iPhone. */
+button.fulfill.v36-fulfill-btn[data-type="pickup"] {
+  background-color: #16803c;
+  color: #ffffff;
+  border: 1px solid #11652f;
+  -webkit-appearance: none;
+  appearance: none;
+}
+button.fulfill.v36-fulfill-btn[data-type="pickup"]:hover,
+button.fulfill.v36-fulfill-btn[data-type="pickup"]:focus-visible {
+  background-color: #11652f;
+}
+button.fulfill.v36-fulfill-btn[data-type="pickup"]:disabled {
+  opacity: .5;
+}
