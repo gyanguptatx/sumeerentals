@@ -1,0 +1,27 @@
+name: IndexNow Submission
+
+on:
+  workflow_run:
+    workflows: ["pages-build-deployment"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  submit-indexnow:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Submit website to IndexNow
+        run: |
+          curl --fail --show-error --silent \
+            --get "https://api.indexnow.org/indexnow" \
+            --data-urlencode "url=https://www.sumeerentals.com/" \
+            --data-urlencode "key=ed88225fab0b4bbeb93602362add8da5" \
+            --write-out "HTTP Status: %{http_code}\n"
